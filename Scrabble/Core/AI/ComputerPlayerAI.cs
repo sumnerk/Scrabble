@@ -133,7 +133,7 @@ namespace Scrabble.Core.AI
             // Select move according to skill level
             var chosen = MoveSelector.Select(moves, skill, board, rack);
 
-            _logger.LogInformation("Computer plays: {Move}", chosen);
+            _logger.LogInformation("Computer played: {Move}", chosen);
             return chosen;
         }
 

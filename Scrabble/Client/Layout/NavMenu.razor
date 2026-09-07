@@ -126,18 +126,18 @@
                 </div>
             </NotAuthorized>
         </AuthorizeView>
-
-        <div class="bottom-row">
-            @if (!@IconMenuActive)
-            {
-                <span class="bi-nav-menu bi-chevron-double-left-nav-menu" title="Collapse Sidebar" @onclick="ToggleIconMenu"></span>
-            }
-            else
-            {
-                <span class="bi-nav-menu bi-chevron-double-right-nav-menu" title="Expand Sidebar" @onclick="ToggleIconMenu"></span>
-            }
-        </div>
     </nav>
+</div>
+
+<div class="bottom-row">
+    @if (!@IconMenuActive)
+    {
+        <span class="bi-nav-menu bi-chevron-double-left-nav-menu" title="Collapse Sidebar" @onclick="ToggleIconMenu"></span>
+    }
+    else
+    {
+        <span class="bi-nav-menu bi-chevron-double-right-nav-menu" title="Expand Sidebar" @onclick="ToggleIconMenu"></span>
+    }
 </div>
 
 

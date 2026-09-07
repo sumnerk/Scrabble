@@ -193,8 +193,8 @@ textarea {
 .game-play-container {
     display: flex;
     justify-content: flex-start;
-    align-items: center;
-    margin-top: 12px;
+    align-items: left;
+    margin-top: 16px;
 }
 
 .action-buttons-container {
@@ -422,6 +422,7 @@ textarea {
     border: 1px black solid;
     display: flex;
     justify-content: center;
+    width: 100%;
     margin-left: auto;
     margin-right: auto;
 }

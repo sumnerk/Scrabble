@@ -39,23 +39,16 @@
 else
 {
     <div class="container-fluid">
-        @if (!String.IsNullOrEmpty(MessageForLocalHuman))
-        {
-            <div class="scoreboard" id="scoreboard">@MessageForLocalHuman</div>
-        }
-        else
-        {
-            <div>&nbsp;</div>
-        }
 
         <div class="row mb-3 d-flex flex-nowrap overflow-scroll">
             <!-- Player total scores on the left, current player at the top, next player below -->
-            <div class="col-auto" id="total-scores">
+            <div class="col-auto pt-4" id="total-scores">
                 <!-- 10rem => 160px -->
                 <!-- 12rem => 192px -->
                 <!-- 15rem => 240px -->
                 <!-- @{string score_card_style_options = "width: 10rem; max-width: 12rem";} -->
                 @{string score_card_style_options = "min-width: 10rem; max-width: 12rem";}
+                @{string TotalMoveDuration = "";}
                 @if (currentGame.FinalGameStatus == null)
                 {
                     <!-- the game is still in progress -->
@@ -71,10 +64,12 @@ else
                     {
                         @if (currentGame.players[i].MyTurn)
                         {
+                            TotalMoveDuration = PrintTimeSpan(currentGame.players[i].TotalMoveDuration);
                             j = i;
-                            <div class=@($"card mb-4 text-white bg-info {border_decoration_your_go}") style=@($"{score_card_style_options}")>
-                                <h5 class="card-header">@currentGame.players[i].Name</h5>
+                            <div class=@($"card mb-2 text-white bg-info {border_decoration_your_go}") style=@($"{score_card_style_options}")>
+                                <h5 class="card-header style="font-weight: bold;">@currentGame.players[i].Name</h5>
                                 <h4 class="card-body" style="text-align: right; font-weight: bold;">@currentGame.players[i].Score</h4>
+                                <div class="card-footer" style="text-align: right; font-style: italic;">@TotalMoveDuration</div>
                             </div>
                         }
                     }
@@ -83,6 +78,7 @@ else
                     @for (int i = 0; i < currentGame.players.Count - 1; i++)
                     {
                         j = (j + 1) % currentGame.players.Count;
+                        TotalMoveDuration = PrintTimeSpan(currentGame.players[j].TotalMoveDuration);
                         @if (currentGame.players[j].Name == myName)
                         {
                             border_decoration_track_me = "border border-2 border-warning rounded-3";
@@ -94,20 +90,23 @@ else
                         @if (currentGame.players[j].IsActive)
                         {
                             opacity -= 25;
-                            <div class=@($"card mb-4 text-black bg-secondary bg-opacity-{opacity} {border_decoration_track_me}") style=@($"{score_card_style_options}")>
+                            <div class=@($"card mb-2 text-black bg-secondary bg-opacity-{opacity} {border_decoration_track_me}") style=@($"{score_card_style_options}")>
                                 <h6 class="card-header">@currentGame.players[j].Name</h6>
                                 <h5 class="card-body" style="text-align: right;">@currentGame.players[j].Score</h5>
+                                <div class="card-footer" style="text-align: right; font-style: italic;">@TotalMoveDuration</div>
                             </div>
                         }
                     }
                     <!-- Lastly display the inactive players in red -->
                     @for (int i = 0; i < currentGame.players.Count - 1; i++)
                     {
+                        TotalMoveDuration = PrintTimeSpan(currentGame.players[i].TotalMoveDuration);
                         @if (!currentGame.players[i].IsActive)
                         {
-                            <div class="card mb-4 text-white bg-danger" style=@($"{score_card_style_options}")>
+                            <div class="card mb-2 text-white bg-danger" style=@($"{score_card_style_options}")>
                                 <h6 class="card-header">@currentGame.players[i].Name</h6>
-                                <h5 class="card-body" style="text-align: right;">Resigned</h5>
+                                <h6 class="card-body" style="text-align: right;">Resigned</h6>
+                                <div class="card-footer" style="text-align: right; font-style: italic;">@TotalMoveDuration</div>
                             </div>
                         }
                     }
@@ -125,22 +124,26 @@ else
                         int i = 0;
                         @while (shown_counter < currentGame.players.Count)
                         {
+                            TotalMoveDuration = PrintTimeSpan(currentGame.players[i].TotalMoveDuration);
                             if (currentGame.players[i].Name == currentGame.FinalGameStatus.WinningPlayerName && !winner_shown)
                             {
                                 winner_shown = true;
                                 shown_counter++;
-                                <div class=@($"card mb-4 text-white bg-success") style=@($"{score_card_style_options}")>
+                                <div class=@($"card mb-2 text-white bg-success") style=@($"{score_card_style_options}")>
                                     <h5 class="card-header">@currentGame.players[i].Name</h5>
                                     <h4 class="card-body" style="text-align: right; font-weight: bold;">@currentGame.players[i].Score</h4>
+                                    <div class="card-footer" style="text-align: right; font-style: italic;">@TotalMoveDuration</div>
                                 </div>
                             }
                             i = (i + 1) % currentGame.players.Count;
+                            TotalMoveDuration = PrintTimeSpan(currentGame.players[i].TotalMoveDuration);
                             if (winner_shown)
                             {
                                 shown_counter++;
-                                <div class=@($"card mb-4 text-white bg-danger") style=@($"{score_card_style_options}")>
-                                    <h5 class="card-header">@currentGame.players[i].Name</h5>
-                                    <h4 class="card-body" style="text-align: right;">@currentGame.players[i].Score</h4>
+                                <div class=@($"card mb-2 text-white bg-danger") style=@($"{score_card_style_options}")>
+                                    <h6 class="card-header">@currentGame.players[i].Name</h6>
+                                    <h6 class="card-body" style="text-align: right;">@currentGame.players[i].Score</h6>
+                                    <div class="card-footer" style="text-align: right; font-style: italic;">@TotalMoveDuration</div>
                                 </div>
                             }
                         }
@@ -150,9 +153,11 @@ else
                         <!-- a draw -->
                         @for (int i = 0; i < currentGame.players.Count; i++)
                         {
-                            <div class=@($"card mb-4 text-white bg-primary") style=@($"{score_card_style_options}")>
-                                <h5 class="card-header">@currentGame.players[i].Name</h5>
-                                <h4 class="card-body" style="text-align: right;">@currentGame.players[i].Score</h4>
+                            TotalMoveDuration = PrintTimeSpan(currentGame.players[i].TotalMoveDuration);
+                            <div class=@($"card mb-2 text-white bg-primary") style=@($"{score_card_style_options}")>
+                                <h6 class="card-header">@currentGame.players[i].Name</h6>
+                                <h6 class="card-body" style="text-align: right;">@currentGame.players[i].Score</h6>
+                                <div class="card-footer" style="text-align: right; font-style: italic;">@TotalMoveDuration</div>
                             </div>
                         }
                     }
@@ -163,6 +168,14 @@ else
             <!-- pb-4 means that when the recent moves column is displaced to the next row -->
             <!-- that there is decent separation between it and the action buttons -->
             <div class="col-auto pb-4 game-board-container d-flex flex-nowrap" id="game-board">
+                @if (!String.IsNullOrEmpty(MessageForLocalHuman))
+                {
+                    <div class="scoreboard" id="scoreboard">@MessageForLocalHuman</div>
+                }
+                else
+                {
+                    <div>&nbsp;</div>
+                }
                 <div class="game" id="game">
                     <div class="game-element-container">
                         <div class="game-board">
@@ -280,23 +293,29 @@ else
             <!-- it is not displayed on insufficiently wide screens -->
             <!-- for now have removed this from the class 'd-none d-xxl-block' because the .js -->
             <!-- has been jazzed up a bit to improve behaviour when resizing the browser window -->
-            <div class="col-auto" id="recent-moves">
+            <div class="col-auto pt-4" id="recent-moves">
                 <!-- 15rem => 240px -->
                 <!-- 20rem => 320px -->
                 <!-- @{string moves_card_style_options = "width: 15rem; max-width: 20rem";} -->
                 @{string moves_card_style_options = "min-width: 14rem; max-width: 16rem";}
-                @for (int i = currentGame.RecentMoves.Count - 1; i >= 0; i--)
+                @{string LastMoveDuration = "";}
+                @for (int i = currentGame.ListOfRecentMoves.Count - 1; i >= 0; i--)
                 {
-                    <!-- 'who' will contain a name if 'action' is "starts", "played", "resigned", "passed", "swapped" or "won"
-                    otherwise it will contain "Game" and 'action' will contain "drawn" -->
-                    string who = currentGame.RecentMoves[i].Split(' ')[0];
-                    string action = currentGame.RecentMoves[i].Split(' ')[1];
+                    <!-- if 'Action' is "starts", "played", "resigned", "passed", "swapped" or "won"
+                    then 'Who' will contain a name
+                    if 'Action' contains "drawn" then 'Who' will be unpopulated -->
+                    string action = currentGame.ListOfRecentMoves[i].Action;
+                    string who = currentGame.ListOfRecentMoves[i].Who;
+                    LastMoveDuration = PrintTimeSpan(currentGame.ListOfRecentMoves[i].MoveDuration);
                     @if (action == "played")
                     {
                         <div class="card mb-1 text-black bg-primary bg-opacity-50" style=@($"{moves_card_style_options}")>
                             <h6 class="card-header">@who played...</h6>
-                            <div class="card-body">@string.Join(" ", currentGame.RecentMoves[i].Split(' ')[2..^2])</div>
-                            <div class="card-footer" style="text-align: right; font-weight: bold; font-style: italic;">Score : @currentGame.RecentMoves[i].Split(' ')[^1]</div>
+                            <div class="card-body">@currentGame.ListOfRecentMoves[i].Words</div>
+                            <div class="card-footer d-flex justify-content-between">
+                                <div>@LastMoveDuration</div>
+                                <div style="font-weight: bold; font-style: italic;">Score : @currentGame.ListOfRecentMoves[i].Score</div>
+                            </div>
                         </div>
                     }
                     else if (action == "starts")
@@ -343,7 +362,7 @@ else
                     else
                     {
                         <div class="card mb-1 text-white bg-dark" style=@($"{moves_card_style_options}")>
-                            <div class="card-body">? Unknown action ?</div>
+                            <div class="card-body">! Unknown action !</div>
                         </div>
                     }
                 }
@@ -1570,5 +1589,28 @@ else
         }
     }
 
+    public string PrintTimeSpan(TimeSpan t)
+    {
+       if (t == TimeSpan.Zero) return string.Empty;
 
+       string answer;
+       if (t.TotalSeconds < 1.0)
+       {
+         answer = String.Format("{0}ms", t.Milliseconds);
+       }
+       else if (t.TotalMinutes < 1.0)
+       {
+         answer = String.Format("{0}s", t.Seconds);
+       }
+       else if (t.TotalHours < 1.0)
+       {
+         answer = String.Format("{0}m {1}s", t.Minutes, t.Seconds);
+       }
+       else // more than 1 hour
+       {
+         answer = String.Format("{0}h {1}m {2}s", t.Hours, t.Minutes, t.Seconds);
+       }
+
+       return answer;
+    }
 }
