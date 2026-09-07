@@ -26,10 +26,14 @@
 .navbar-toggler:checked {
     background-color: rgba(255, 255, 255, 0.5);
 }
+.navbar-brand {
+    font-size: 1.1rem;
+}
+
 */
 
 .no-collapse {
-    display: block !important;
+    display: flex !important;
     flex-grow: 0;
     flex-shrink: 0;
     white-space: nowrap;
@@ -41,10 +45,6 @@
 .top-row {
     height: 3rem;
     background-color: rgba(255,255,255,0.7);
-}
-
-.navbar-brand {
-    font-size: 1.1rem;
 }
 
 .bi-nav-menu {
@@ -136,13 +136,22 @@
     transform: translate(2px, 0);
 }
 
-/* for the bottom row of the sidebar, which contains the collapse and expand buttons */
+/* for the row of the sidebar which contains the collapse and expand buttons */
+/* this row is positioned at the bottom of the sidebar and is always visible */
+/* well - not quite - it seems troublesome if the content of the main window is too long and the user scrolls down - then the bottom row of the sidebar is not visible */
+/* so position: fixed means the icon is at the bottom of the visible window even when scrolling but it moves up if the window is shrunk and overlaps the other icons */
+/* position: absolute means the icon is at the bottom of the sidebar and is not visible if the user scrolls down - but it does not overlap other icons if the window is shrunk */
+/* so - position: absolute is probably the better choice */
+/* perhaps maybe move the bottom row of the sidebar to the top of the sidebar and then it is always visible and does not overlap other icons if the window is shrunk - but then it is not at the bottom of the sidebar which is where it should be */
+/* you decide ! */
+/* "absolute" is mainly a 'problem' on the game list as it can be quite long but in all honesty there is no need to collapse the sidebar on the game list screen */
 .bottom-row {
+    /* position: fixed; */
     position: absolute;
-    bottom: 0;
+    bottom: 1rem;
     width: 100%;
     padding-left: 1rem;
-    padding-bottom: 1rem;
+    /* padding-bottom: 1rem; */
 }
 
 .bi-chevron-double-left-nav-menu {

@@ -24,14 +24,21 @@ namespace Scrabble.Shared
 
             currentGameState.MoveCount = gameStateDto.MoveCount;
             currentGameState.currentPlayerIndex = gameStateDto.CurrentPlayerIndex;
-            currentGameState.passCount= gameStateDto.PassCount;
+            currentGameState.passCount = gameStateDto.PassCount;
             currentGameState.currentMoveScore = gameStateDto.CurrentMoveScore;
             currentGameState.lastMove = gameStateDto.LastMove;
             currentGameState.LastMoveResult = gameStateDto.LastMoveResult;
             currentGameState.FinalGameStatus = gameStateDto.FinalGameStatus;
             currentGameState.RecentMoves = gameStateDto.RecentMoves;
+            if (gameStateDto.ListOfRecentMoves != null)
+            {
+                currentGameState.ListOfRecentMoves = gameStateDto.ListOfRecentMoves;
+            }
+            else
+            {
+                currentGameState.ListOfRecentMoves = new List<MoveInfo>();
+            }
         }
-
 
         private static Player SetupPlayer(GameStateDto.GamePlayerDto sourcePlayer)
         {
@@ -50,10 +57,16 @@ namespace Scrabble.Shared
             activePlayer.MyTurn = sourcePlayer.MyTurn;
             activePlayer.PlayerPasses = sourcePlayer.PlayerPasses;
             activePlayer.Skill = sourcePlayer.Skill;
+
             activePlayer.ActiveFlag = sourcePlayer.ActiveFlag;
             // catch historical game data where ActiveFlag was not present and set it to "Y"
             // because before this change no player could resign without it ending the game
             if (String.IsNullOrEmpty(activePlayer.ActiveFlag)) activePlayer.ActiveFlag = "Y";
+
+            // keep track of time taken for moves - last and overall
+            activePlayer.MoveStartTime = sourcePlayer.MoveStartTime;
+            activePlayer.LastMoveDuration = sourcePlayer.LastMoveDuration;
+            activePlayer.TotalMoveDuration = sourcePlayer.TotalMoveDuration;
 
             return activePlayer;
         }
@@ -70,7 +83,5 @@ namespace Scrabble.Shared
                 }
             }
         }
-
-
     }
 }

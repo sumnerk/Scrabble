@@ -4,6 +4,7 @@ using Scrabble.Core.AI;
 using Scrabble.Core.Config;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Scrabble.Core.Types
@@ -82,7 +83,6 @@ namespace Scrabble.Core.Types
 
         public override async void NotifyTurn(ITurnImplementor implementor, string lastMoveDetail)
         {
-
             if (window != null)
             {
                 // Webassembly currently single thread
@@ -133,7 +133,8 @@ namespace Scrabble.Core.Types
                 // No legal moves - pass or exchange tiles
                 // return Ok(new { action = "pass" });
                 turn = new Pass();
-            } else
+            }
+            else
             {
                 // Coordinates are not sorted in move.Placements, so sort them to ensure correct order of tile placements in PlaceMove
                 var coordinate = new List<Coordinate>();
@@ -159,10 +160,14 @@ namespace Scrabble.Core.Types
                     moveTiles.Add((coordinate[i], tile[i]));
                 }
 
+                // let the move implementation methods decide on when to reset PlayerPasses
+                // and when to increment
+                //PlayerPasses = 0;
                 turn = new PlaceMove(moveTiles);
             }
 
             //await Task.Delay(1); // (interactive only) Yield for a short period to allow caller to update status
+            /*
             if (turn.GetType() == typeof(Scrabble.Core.Types.Pass))
             {
                 PlayerPasses++;
@@ -171,10 +176,22 @@ namespace Scrabble.Core.Types
             {
                 PlayerPasses = 0;
             }
-
-            if (PlayerPasses >= 3 && Tiles.Count == 7)
+            */
+            if (turn.GetType() == typeof(Scrabble.Core.Types.Pass) && PlayerPasses >= 3 && Tiles.Count == 7)
             {
-                PlayerPasses = 0;
+                //Console.WriteLine("TileBag count - " + TileBag.Inventory.Count); not accessible?
+                // turn a pass move into a swap tiles move if we've passed too many times
+                // (and if there are 7 tiles in the rack - why 7 ?)
+
+                // why not test if TileBag.Inventory.Count > Tiles.Count or some other calc to
+                // assess whether swapping makes any sense eg 6 tiles in bag and 7 to swap - maybe yes
+                // if 1 tile in bag and 5 in rack, perhaps not so then chose to pass
+                // also if we decide explicitly to pass or exchange then the PerformDumpLetters method
+                // can be cleaned up because at the moment it is deciding on pass or exchange
+
+                // let the move implementation methods decide on when to reset PlayerPasses
+                // and when to increment
+                //PlayerPasses = 0;
                 TakeTurn(implementor, new DumpLetters(Tiles));
             }
             else

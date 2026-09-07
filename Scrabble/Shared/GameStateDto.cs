@@ -13,6 +13,7 @@ namespace Scrabble.Shared
         public GameStateDto()
         {
             RecentMoves = new List<string>();
+            ListOfRecentMoves = new List<MoveInfo>();
         }
 
         public GameStateDto(GameState currentGameState) 
@@ -34,6 +35,9 @@ namespace Scrabble.Shared
             this.LastMoveResult = currentGameState.LastMoveResult;
             this.FinalGameStatus = currentGameState.FinalGameStatus;
             this.RecentMoves = currentGameState.RecentMoves;
+            this.GameTime = currentGameState.gameTime;
+            this.AllowOwl = currentGameState.allowOwl;
+            this.ListOfRecentMoves = currentGameState.ListOfRecentMoves;
         }
 
         public Bag GameBag { get; set; } // Bag and tiles are serializable
@@ -42,6 +46,7 @@ namespace Scrabble.Shared
 
         public List<GamePlayerDto> GamePlayerList { get; set; }
         public List<string> RecentMoves { get; set; }
+        public List<MoveInfo> ListOfRecentMoves { get; set; }
 
         // From GameState
         public int MoveCount { get; set; }
@@ -51,6 +56,9 @@ namespace Scrabble.Shared
         public Move LastMove { get; set; }
         public string LastMoveResult { get; set; }
         public GameOutcome FinalGameStatus { get; set; }
+        public TimeSpan GameTime { get; set; }
+        public bool AllowOwl { get; set; }
+
 
 
         /// <summary>
@@ -82,6 +90,9 @@ namespace Scrabble.Shared
                 {
                     this.Skill = ((ComputerPlayer)activePlayer).Skill;
                 }
+                this.MoveStartTime = activePlayer.MoveStartTime;
+                this.LastMoveDuration = activePlayer.LastMoveDuration;
+                this.TotalMoveDuration = activePlayer.TotalMoveDuration;
             }
 
             public bool IsHuman { get; set; }
@@ -107,6 +118,9 @@ namespace Scrabble.Shared
                     return ActiveFlag == "Y";
                 }
             }
+            public TimeSpan LastMoveDuration { get; set; }
+            public TimeSpan TotalMoveDuration { get; set; }
+            public long MoveStartTime { get; set; }
         }
 
 

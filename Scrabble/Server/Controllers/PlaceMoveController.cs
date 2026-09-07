@@ -1,16 +1,17 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+//using System.Text.Json;
+using Newtonsoft.Json;
 using Scrabble.Core;
 using Scrabble.Core.Config;
 using Scrabble.Core.Types;
 using Scrabble.Server.Data;
-using Scrabble.Shared;
-//using System.Text.Json;
-using Newtonsoft.Json;
-using Microsoft.AspNetCore.Authorization;
 using Scrabble.Server.Hubs;
-using Microsoft.AspNetCore.SignalR;
 using Scrabble.Server.Services;
+using Scrabble.Shared;
+using System.Diagnostics;
 
 namespace Scrabble.Server.Controllers
 {
@@ -227,8 +228,6 @@ namespace Scrabble.Server.Controllers
             currentGame.CurrentPlayer.TakeTurn(currentGame, placeMove);
 
             return currentGame;
-
         }
     }
-
 }

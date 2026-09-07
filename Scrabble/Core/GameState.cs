@@ -5,10 +5,12 @@ using Scrabble.Core.Config;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlTypes;
+using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Security.AccessControl;
+using static System.Collections.Specialized.BitVector32;
 
 namespace Scrabble.Core.Types
 {
@@ -24,6 +26,11 @@ namespace Scrabble.Core.Types
         public Move lastMove;  // To identify letters to un-highlight
         public string LastMoveResult { get; set; }
         public List<string> RecentMoves { get; set; } = new List<string>();
+        public List<MoveInfo> ListOfRecentMoves { get; set; } = new List<MoveInfo>();
+
+        public TimeSpan gameTime { get; set; } = TimeSpan.Zero;
+        public bool allowOwl { get; set; } = false;
+
         private const int RecentMoveKeepCount = 4; // Number of recent moves to retain
 
         public GameOutcome FinalGameStatus { get; set; }
@@ -80,11 +87,16 @@ namespace Scrabble.Core.Types
             this.CurrentPlayer.MyTurn = false;
             ++this.moveCount;
 
+            Console.WriteLine(" ");
+            Console.WriteLine("Move #" + (this.moveCount + 1));
+
             // move on to the next active player
             do
             {
                 this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.Count;
             } while (!this.CurrentPlayer.IsActive);
+
+            StartTheClock(false);
 
             this.CurrentPlayer.MyTurn = true;
             this.CurrentPlayer.NotifyTurn((ITurnImplementor)this, lastMoveDetail);
@@ -152,16 +164,23 @@ namespace Scrabble.Core.Types
                 this.currentPlayerIndex = FindStartingPlayerIndex(startingPlayerId);
                 drawOutcome = $"Challenger {this.CurrentPlayer.Name} starts the game.";
             }
-            // probably should update TrackRecentMoves to take a parameter for the move
-            // result instead of using LastMoveResult, but for now just set it and then clear it
-            LastMoveResult = $"{this.CurrentPlayer.Name} starts the game";
-            TrackRecentMoves();
-            LastMoveResult = "";
 
+            MoveInfo mi = new MoveInfo()
+            {
+                Action = "starts",
+                Who = CurrentPlayer.Name,
+                Description = $"{this.CurrentPlayer.Name} starts the game"
+            };
+            TrackRecentMoveInfo(mi);
+
+            Console.WriteLine(" ");
+            Console.WriteLine("Move #" + (this.MoveCount + 1));
+
+            StartTheClock(false);
 
             this.CurrentPlayer.MyTurn = true;
-
             this.CurrentPlayer.NotifyTurn((ITurnImplementor)this, "You won the tile draw.");
+
             return drawOutcome;
         }
 
@@ -192,20 +211,74 @@ namespace Scrabble.Core.Types
             return false;
         }
 
+        private void StartTheClock(Boolean logmsg)
+        {
+            CurrentPlayer.MoveStartTime = Stopwatch.GetTimestamp();
+            if (logmsg)
+            {
+                Console.WriteLine("Player '" + CurrentPlayer.Name + "' [start move timer] @ " +
+                                  CurrentPlayer.MoveStartTime.ToString());
+            }
+        }
+
+        private void StopTheClock(string action)
+        {
+            // "stops" the move stopwatch and calculates the move duration and total duration
+            // i.e. the sum of all individual move times for a player
+            // logs a message to indicate what the time relates to if action is populated
+            CurrentPlayer.LastMoveDuration = Stopwatch.GetElapsedTime(CurrentPlayer.MoveStartTime, Stopwatch.GetTimestamp());
+            CurrentPlayer.TotalMoveDuration += CurrentPlayer.LastMoveDuration;
+            if (!String.IsNullOrEmpty(action))
+            {
+                Console.WriteLine("Player '" + CurrentPlayer.Name + "' [" + action + "] " +
+                                  "elapsed time " + CurrentPlayer.LastMoveDuration.ToString() +
+                                  ", total time " + CurrentPlayer.TotalMoveDuration.ToString());
+            }
+        }
+
+        private void ResetPassCount(string action)
+        {
+            if (!String.IsNullOrEmpty(action) && CurrentPlayer.PlayerPasses > 0)
+            {
+                Console.WriteLine("Player '" + CurrentPlayer.Name + "' [" + action + "] " +
+                                  "resetting pass count to zero (was " + CurrentPlayer.PlayerPasses + ")");
+            }
+            CurrentPlayer.PlayerPasses = 0;
+        }
 
         void ITurnImplementor.PerformPass()
         {
+            StopTheClock("passed");
+            MoveInfo mi = new MoveInfo()
+            {
+                Action = "passed",
+                Who = CurrentPlayer.Name,
+                MoveDuration = CurrentPlayer.LastMoveDuration,
+                TotalMoveDuration = CurrentPlayer.TotalMoveDuration,
+                Description = $"{this.CurrentPlayer.Name} passed"
+            };
+            TrackRecentMoveInfo(mi);
+
+            CurrentPlayer.PlayerPasses++;
             ++this.passCount;
-            LastMoveResult = $"{this.CurrentPlayer.Name} passed";
-            TrackRecentMoves();
-            LastMoveResult = "";
+
+            Console.WriteLine("Player '" + CurrentPlayer.Name + "' pass count is " + CurrentPlayer.PlayerPasses);
+            // not sure what this passCount is really used for...
+            //Console.WriteLine("Total pass count for the game (all players) is " + this.passCount);
         }
+
         void ITurnImplementor.PerformResign()
         {
-            CurrentPlayer.ActiveFlag = "N";
-            LastMoveResult = $"{CurrentPlayer.Name} resigned";
-            TrackRecentMoves();
-            LastMoveResult = "";
+            StopTheClock("resigned");
+            MoveInfo mi = new MoveInfo()
+            {
+                Action = "resigned",
+                Who = CurrentPlayer.Name,
+                MoveDuration = CurrentPlayer.LastMoveDuration,
+                TotalMoveDuration = CurrentPlayer.TotalMoveDuration,
+                Description = $"{CurrentPlayer.Name} resigned"
+            };
+            TrackRecentMoveInfo(mi);
 
             // place tiles back in the bag
             List<Tile> returned_tiles = new List<Tile>();
@@ -215,35 +288,59 @@ namespace Scrabble.Core.Types
             }
             TileBag.Put(returned_tiles);
             CurrentPlayer.Tiles.Clear();
+
             // set the player score to 0 because it's possible they
             // could resign but have a massive score and by the time the
             // other players finish they might still not have reached it
             // so a perverse outcome could occur where a resigned player
             // could win
+            CurrentPlayer.ActiveFlag = "N";
             CurrentPlayer.Score = 0;
+            ResetPassCount("resigned");
         }
 
         void ITurnImplementor.PerformDumpLetters(DumpLetters dl)
         {
+            string action_taken = "";
+            string description = "";
             if (TileBag.Inventory.Count == 0)
             {
-                LastMoveResult = $"{this.CurrentPlayer.Name} passed";  // Equivalent to pass (if computer player)
-                TrackRecentMoves();
-                return;
+                action_taken = "passed";
+                description = $"{this.CurrentPlayer.Name} passed";  // Equivalent to pass (if computer player)
+
+                // nothing to exchange so it counts as a pass
+                CurrentPlayer.PlayerPasses++;
             }
-
-            var dumpList = dl.Letters.Clone(); // Work with copy since original could be modified
-            // Ensure not trying to swap more tiles than bag contains
-            while (dumpList.Count > TileBag.Inventory.Count) dumpList.RemoveAt(ThreadSafeRandom.Next(dumpList.Count-1));
-
-            foreach (var tile in dumpList)
+            else
             {
-                RemoveTileByID(tile.ID, this.CurrentPlayer.Tiles);
+                action_taken = "swapped";
+                description = $"{this.CurrentPlayer.Name} swapped tiles";
+
+                var dumpList = dl.Letters.Clone(); // Work with copy since original could be modified
+                // Ensure not trying to swap more tiles than bag contains
+                while (dumpList.Count > TileBag.Inventory.Count) dumpList.RemoveAt(ThreadSafeRandom.Next(dumpList.Count - 1));
+
+                foreach (var tile in dumpList)
+                {
+                    RemoveTileByID(tile.ID, this.CurrentPlayer.Tiles);
+                }
+                this.GiveTiles(this.CurrentPlayer, dumpList.Count());
+                TileBag.Put(dumpList);
+
+                // tiles exchanged so reset the pass counter
+                ResetPassCount("swapped");
             }
-            this.GiveTiles(this.CurrentPlayer, dumpList.Count());
-            TileBag.Put(dumpList);
-            LastMoveResult = $"{this.CurrentPlayer.Name} swapped tiles";
-            TrackRecentMoves();
+
+            StopTheClock(action_taken);
+            MoveInfo mi = new MoveInfo()
+            {
+                Action = action_taken,
+                Who = CurrentPlayer.Name,
+                MoveDuration = CurrentPlayer.LastMoveDuration,
+                TotalMoveDuration = CurrentPlayer.TotalMoveDuration,
+                Description = description
+            };
+            TrackRecentMoveInfo(mi);
         }
 
         private void RemoveTileByID(string id, List<Tile> tiles)
@@ -312,28 +409,32 @@ namespace Scrabble.Core.Types
 
             this.GiveTiles(this.CurrentPlayer, turn.Letters.Count);
 
-            // rely on GiveTiles to report the number of tiles given and the current player's tile count
-            // because this next line is wrong when the tile bag is empty
-            //Console.WriteLine($"Gave {turn.Letters.Count} to {this.CurrentPlayer.Name}, has {this.CurrentPlayer.Tiles.Count}");
             lastMove = thisMove;
 
-            LastMoveResult = $"{this.CurrentPlayer.Name} played {string.Join(", ", thisMove.ValidWordsMade)} for {thisMove.Score}";
-            TrackRecentMoves();
-            // set LastMoveResult to blank so the next player doesn't see the previous player's move result on
-            // the scoreboard line above the main playing board as it's now shown on the right hand side
-            LastMoveResult = "";
+            ResetPassCount("played tiles");
+            StopTheClock("played tiles");
+            MoveInfo mi = new MoveInfo()
+            {
+                MoveNumber = MoveCount,
+                Action = "played",
+                Who = CurrentPlayer.Name,
+                Words = string.Join(", ", thisMove.ValidWordsMade),
+                MoveDuration = CurrentPlayer.LastMoveDuration,
+                TotalMoveDuration = CurrentPlayer.TotalMoveDuration,
+                Score = thisMove.Score,
+                Description = $"{this.CurrentPlayer.Name} played {string.Join(", ", thisMove.ValidWordsMade)} for {thisMove.Score}"
+            };
+            TrackRecentMoveInfo(mi);
         }
 
-
-        void TrackRecentMoves()
+        void TrackRecentMoveInfo(MoveInfo mi)
         {
-            RecentMoves.Add(LastMoveResult);
-            while (RecentMoves.Count > RecentMoveKeepCount)
+            ListOfRecentMoves.Add(mi);
+            while (ListOfRecentMoves.Count > RecentMoveKeepCount)
             {
-                RecentMoves.RemoveAt(0);  // Remove oldest entry
+                ListOfRecentMoves.RemoveAt(0);  // Remove oldest entry
             }
         }
-
 
         void ITurnImplementor.TakeTurn(Turn t)
         {
@@ -347,15 +448,12 @@ namespace Scrabble.Core.Types
             {
                 if (!this.IsOpeningMove && !(t is Scrabble.Core.Types.PlaceMove))
                     --this.moveCount;
-                //TrackRecentMoves();
                 this.NextMove(LastMoveResult);  // Computer moves here if next player
+                LastMoveResult = "";
             }
             else
             {
                 this.FinishGame();
-                // moved the following call into FinishGame() because FinishGame() is also
-                // called from the NoMoveController when a player resigns
-                //TrackRecentMoves();
             }
         }
 
@@ -371,12 +469,16 @@ namespace Scrabble.Core.Types
                 if (player.IsActive && !player.HasTiles) return true;
             }
 
-            bool all_active_players_passed_twice = true;
+            bool all_active_players_passed_limit = true;
+            // set to 200 while i test with a hung game :-)
+            int pass_limit = 3;
             foreach (var player in this.players)
             {
-                if (player.IsActive && player.PlayerPasses < 2) all_active_players_passed_twice = false;
+                if (player.PlayerPasses >= pass_limit) Console.WriteLine(player.Name + " breached pass move count limit of " + player.PlayerPasses);
+                //Console.WriteLine(player.Name + " - " + player.PlayerPasses);
+                if (player.IsActive && player.PlayerPasses < pass_limit) all_active_players_passed_limit = false;
             }
-            if (all_active_players_passed_twice) return true;
+            if (all_active_players_passed_limit) return true;
 
             int active_player_count = 0;
             foreach (var player in this.players)
@@ -491,24 +593,32 @@ namespace Scrabble.Core.Types
             FinalGameStatus.WinningPlayerName = "";
 
             var winners = this.TallyGameResult();
+
+            MoveInfo mi;
+
             if (winners.Count == 1)
             {
                 FinalGameStatus.Win_Type = WinTypes.WinType.Win;
                 FinalGameStatus.WinningPlayerId = winners[0].PlayerId;
                 FinalGameStatus.WinningPlayerName = winners[0].Name;
-                LastMoveResult = $"{winners[0].Name} won";
+                mi = new MoveInfo()
+                {
+                    Action = "won",
+                    Who = FinalGameStatus.WinningPlayerName,
+                    Description = $"{winners[0].Name} won"
+                };
             }
             else
             {
                 FinalGameStatus.Win_Type = WinTypes.WinType.Draw;
-                LastMoveResult = "Game drawn";
+                mi = new MoveInfo()
+                {
+                    Action = "drawn",
+                    Description = "Game drawn"
+                };
             }
 
-            TrackRecentMoves();
-
-            // set to blank so does not appear on the scoreboard line above the
-            // main playing board as it's now shown on the right hand side
-            LastMoveResult = "";
+            TrackRecentMoveInfo(mi);
 
             foreach (var player in this.players)
             {

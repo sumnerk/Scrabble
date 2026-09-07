@@ -24,6 +24,10 @@ namespace Scrabble.Core.Types
         public int PlayerPasses { get; set; }
         public int Skill { get; set; }
 
+        public long MoveStartTime { get; set; }
+        public TimeSpan LastMoveDuration { get; set; }
+        public TimeSpan TotalMoveDuration { get; set; }
+
         public bool HasTiles => Tiles.Count > 0;
         public bool IsActive
         {
@@ -52,6 +56,7 @@ namespace Scrabble.Core.Types
             this.ActiveFlag = "Y";
             Tiles = new List<Tile>();
             Score = 0;
+            TotalMoveDuration = TimeSpan.Zero;
         }
 
         public void AddScore(int s)
