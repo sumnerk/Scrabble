@@ -1,7 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Scrabble.Shared;
-using static System.Net.WebRequestMethods;
+using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using static System.Net.WebRequestMethods;
 
 namespace Scrabble.Shared.Auth
 {
@@ -22,7 +27,10 @@ namespace Scrabble.Shared.Auth
             }
 
             var emailAddress = context.User.FindFirst(c => c.Type == AppEmailClaimType.ThisAppEmailClaimType).Value;
-            Console.WriteLine($"Checking auth policy 'IsAdmin' for email: '{emailAddress}'");
+
+            //Console.WriteLine(" ");
+            //Console.WriteLine($"Checking auth policy 'IsAdmin' for : '{emailAddress}'");
+
             var playerDto = AuthCache.CachedPlayer;
             if (playerDto == null || playerDto.Email != emailAddress)
             {
@@ -31,14 +39,44 @@ namespace Scrabble.Shared.Auth
                 {
                     if (AuthCache.AuthHttpClient != null)
                     {
-                        playerDto = await AuthCache.AuthHttpClient.GetFromJsonAsync<PlayerDto>($"/api/Player");
-                        AuthCache.CachedPlayer = playerDto;
+                        bool fromjson = true;
+                        if (fromjson)
+                        {
+                            //Console.WriteLine(" Getting player data (GetFromJsonAsync)");
+                            playerDto = await AuthCache.AuthHttpClient.GetFromJsonAsync<PlayerDto>($"/api/Player");
+                            AuthCache.CachedPlayer = playerDto;
+                        }
+                        else
+                        {
+                            var serializeOptions = new JsonSerializerOptions
+                            {
+                                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                            };
+                            Console.WriteLine(" Getting player data (GetAsync)");
+                            var response = await AuthCache.AuthHttpClient.GetAsync($"/api/Player");
+                            if (response.IsSuccessStatusCode)
+                            {
+                                var stringData = await response.Content.ReadAsStringAsync();
+                                Console.WriteLine("'IsAdmin' data is : " + stringData);
+                                playerDto = JsonSerializer.Deserialize<PlayerDto>(stringData, serializeOptions);
+                                AuthCache.CachedPlayer = playerDto;
+                            }
+                            else
+                            {
+                                var statusCode = response.StatusCode.ToString();
+                                Console.WriteLine("'IsAdmin' status code is : " + statusCode);
+                            }
+                        }
                     }
-
                 }
-                catch (Exception ex) {
-                    Console.WriteLine(" ");
-                    Console.WriteLine("Error occurred while fetching admin player info.");
+                catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    //Console.WriteLine("AdminHandler: Session not authorized to lookup player info");
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("AdminHandler: Error occurred while fetching player info");
                     Console.WriteLine(ex.ToString());
                     return;
                 }
@@ -46,7 +84,12 @@ namespace Scrabble.Shared.Auth
 
             if (playerDto != null && playerDto.IsAdmin)
             {
+                Console.WriteLine("AdminHandler: User has 'IsAdmin' access");
                 context.Succeed(requirement);
+            }
+            else
+            {
+                Console.WriteLine("AdminHandler: User does not have 'IsAdmin' access");
             }
 
             return;

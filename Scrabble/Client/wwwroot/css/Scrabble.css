@@ -327,7 +327,19 @@ textarea {
     color:darkred;
 }
 
-.square-multiplier1, .square-multiplier2, .tile-content-score {
+.high-value-tile-letter {
+    /*color:darkmagenta;*/
+    color:darkorchid;
+}
+
+.high-value-tile-score {
+    bottom: 1px;
+    right: 1px;
+    position: absolute;
+    color: black;
+}
+
+.square-multiplier1, .square-multiplier2, .tile-content-score, .high-value-tile-score {
     font-size: var(--tile-score-font-size, 0.9vw);
     line-height: 100%;
 }
@@ -426,9 +438,6 @@ textarea {
     margin-left: auto;
     margin-right: auto;
 }
-
-/* removed redundant entries from here */
-
 
 /*for player tile row */
 .player-tiles {
