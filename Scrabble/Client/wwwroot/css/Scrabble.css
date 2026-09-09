@@ -163,6 +163,17 @@ textarea {
     padding: 8px;
 }
 
+.owl-checkbox-icon {
+    background-image: url("/images/ProfessorOwl2.png");
+    background-size: 100% 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    width: 48px;
+    height: 48px;
+}
+
 .tile-bag-area {
     display: inline-flex;
 }
@@ -329,14 +340,16 @@ textarea {
 
 .high-value-tile-letter {
     /*color:darkmagenta;*/
-    color:darkorchid;
+    /*color:darkorchid;*/
+    color:blue;
 }
 
 .high-value-tile-score {
     bottom: 1px;
     right: 1px;
     position: absolute;
-    color: black;
+    /*color: black;*/
+    color:navy;
 }
 
 .square-multiplier1, .square-multiplier2, .tile-content-score, .high-value-tile-score {

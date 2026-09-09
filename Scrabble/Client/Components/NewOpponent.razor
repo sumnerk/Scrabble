@@ -15,18 +15,20 @@
         @if (opponents == null)
         {
             <span>Getting Players list</span>
-        } else
+        }
+        else
         {
-            foreach (var playerInfo in opponents)
+            <div class="col">
+            @foreach (var playerInfo in opponents)
             {
-                @if (playerInfo.Player.IsPlayer)
+                if (playerInfo.Player.IsPlayer)
                 {
                     <div>
                         <InputCheckbox @bind-Value=@playerInfo.Selected @oninput="CheckboxChanged" />
                         @playerInfo.Player.Name
                     </div>
                 }
-                @if (playerInfo.Player.IsComputerPlayer)
+                if (playerInfo.Player.IsComputerPlayer)
                 {
                     <fieldset>
                         <InputRadioGroup @bind-Value=@proficiency.Level>
@@ -41,6 +43,14 @@
                     </fieldset>
                 }
             }
+            </div>
+            <div class="col align-self-end d-flex justify-content-end">
+                <label>
+                    <InputCheckbox @bind-Value=@owlEnabled @oninput="OwlCheckboxChanged" />
+                    <span class="owl-checkbox-icon"></span> 
+                </label>
+            </div>
+
         }
     </div>
 
@@ -60,6 +70,7 @@
 
     List<SelectedPlayer> opponents;
     int numOpponents = 0;
+    bool owlEnabled = false;
 
     int myPlayerId;
 
@@ -101,6 +112,13 @@
         opponents = otherPlayers;
     }
 
+    private void OwlCheckboxChanged(ChangeEventArgs args)
+    {
+        // use the checkbox state to enable/disable use of the owl
+        owlEnabled = (bool)args.Value;
+        //Console.WriteLine("owl unleashed : " + owlEnabled);
+    }
+
     private void CheckboxChanged(ChangeEventArgs args)
     {
         // get the checkbox state to enable/disable start button
@@ -128,7 +146,7 @@
         Console.WriteLine($"Starting new game with {playerIdList.Count} players, skill level {(int)proficiency.Level}");
         try
         {
-            var uri = $"/api/NewGame?skill={(int)proficiency.Level}";
+            var uri = $"/api/NewGame?skill={(int)proficiency.Level}&owl={(bool)owlEnabled}";
             var response = await Http.PostAsJsonAsync<List<int>>(uri, playerIdList);
             if (!response.IsSuccessStatusCode)
             {
@@ -145,7 +163,6 @@
             errorMessage = $"Something went wrong: {ex.Message}";
             Console.WriteLine(ex.ToString());
         }
-
     }
 
     private class SelectedPlayer

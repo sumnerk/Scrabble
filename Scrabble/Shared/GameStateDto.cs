@@ -36,7 +36,7 @@ namespace Scrabble.Shared
             this.FinalGameStatus = currentGameState.FinalGameStatus;
             this.RecentMoves = currentGameState.RecentMoves;
             this.GameTime = currentGameState.gameTime;
-            this.AllowOwl = currentGameState.allowOwl;
+            this.AllowOwl = currentGameState.AllowOwl;
             this.ListOfRecentMoves = currentGameState.ListOfRecentMoves;
         }
 

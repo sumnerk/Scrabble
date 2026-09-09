@@ -195,7 +195,7 @@ else
                 <div class="game-play-container" id="game-play-row">
                     <div>
                         @{string owl_is = "invisible";}
-                        @if (!MyMove && currentMoveGameDto != null)
+                        @if (!MyMove && currentMoveGameDto != null && AllowTheOwl())
                         {
                             owl_is = "visible";
                         }
@@ -403,8 +403,8 @@ else
     private string MessageForLocalHuman { get; set; }
     private string LoadMessage { get; set; } = "Loading game...";
 
-    private List<String> LeftPlayerScores { get; set; }
-    private List<String> RightPlayerScores { get; set; }
+    //private List<String> LeftPlayerScores { get; set; }
+    //private List<String> RightPlayerScores { get; set; }
 
     private GameDto currentMoveGameDto = null; // For advisory move: State at start of move
     private bool professorMoveValid = false;
@@ -419,7 +419,7 @@ else
     private bool DisabledShuffle(bool buttonDisabled = false) => buttonDisabled || IsSubmitting || (currentGame.FinalGameStatus != null);
     private bool initialLoad = true;
 
-
+    private bool AllowTheOwl() => currentGame.AllowOwl;
 
     private HubConnection hubConnection;
     private Data.ChatParameters chatParameters;
@@ -1241,7 +1241,6 @@ else
 
 
 
-
     private async Task ShowChat()
     {
         chatParameters = new Data.ChatParameters();
@@ -1341,7 +1340,7 @@ else
 
         WordInPlay.Clear();
         validMove = false;
-        UpdateGameScore(newGame);
+        //UpdateGameScore(newGame);
 
         if (!MyMove)
         {
@@ -1565,7 +1564,7 @@ else
         await hubConnection.InvokeAsync("ReceiveGameLogin", GameId);
     }
 
-
+/*
     void UpdateGameScore(GameState gameState)
     {
         LeftPlayerScores = new List<String>();
@@ -1588,6 +1587,7 @@ else
             playerCount++;
         }
     }
+*/
 
     public string PrintTimeSpan(TimeSpan t)
     {
