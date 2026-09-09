@@ -155,15 +155,17 @@
                     nHumans++;
             }
         }
-        if (nHumans == 0)
+
+        if (nHumans > 0 && nComputers == 0)
+        {
+            owlDisabled = false;
+        }
+        else
         {
             owlSelected = false;
             owlDisabled = true;
         }
-        else
-        {
-            owlDisabled = false;
-        }
+
         numOpponents = nHumans + nComputers;
         Console.WriteLine("humans:" + nHumans + " computers:" + nComputers + " total:" + numOpponents +
                           " owl selected:" + owlSelected + " owlDisabled:" + owlDisabled);
