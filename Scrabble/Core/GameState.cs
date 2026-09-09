@@ -29,7 +29,7 @@ namespace Scrabble.Core.Types
         public List<MoveInfo> ListOfRecentMoves { get; set; } = new List<MoveInfo>();
 
         public TimeSpan gameTime { get; set; } = TimeSpan.Zero;
-        public bool allowOwl { get; set; } = false;
+        public bool AllowOwl { get; set; } = false;
 
         private const int RecentMoveKeepCount = 4; // Number of recent moves to retain
 

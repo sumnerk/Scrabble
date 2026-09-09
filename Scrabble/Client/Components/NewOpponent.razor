@@ -15,18 +15,21 @@
         @if (opponents == null)
         {
             <span>Getting Players list</span>
-        } else
+        }
+        else
         {
-            foreach (var playerInfo in opponents)
+            <div class="col">
+            @foreach (var playerInfo in opponents)
             {
-                @if (playerInfo.Player.IsPlayer)
+                if (playerInfo.Player.IsPlayer)
                 {
                     <div>
-                        <InputCheckbox @bind-Value=@playerInfo.Selected @oninput="CheckboxChanged" />
+                        <!-- <InputCheckbox @bind-Value=@playerInfo.Selected @oninput="CheckboxChanged" /> -->
+                        <InputCheckbox @bind-Value=@playerInfo.Selected @bind-Value:after="() => CheckboxChanged_after(playerInfo)" />
                         @playerInfo.Player.Name
                     </div>
                 }
-                @if (playerInfo.Player.IsComputerPlayer)
+                if (playerInfo.Player.IsComputerPlayer)
                 {
                     <fieldset>
                         <InputRadioGroup @bind-Value=@proficiency.Level>
@@ -41,6 +44,14 @@
                     </fieldset>
                 }
             }
+            </div>
+            <div class="col align-self-end d-flex justify-content-end">
+                <label>
+                    <InputCheckbox @bind-Value=@owlSelected disabled=@owlDisabled @oninput="OwlCheckboxChanged" />
+                    <span class="owl-checkbox-icon"></span> 
+                </label>
+            </div>
+
         }
     </div>
 
@@ -60,6 +71,10 @@
 
     List<SelectedPlayer> opponents;
     int numOpponents = 0;
+
+    // initial values for owl widget
+    bool owlDisabled = true;
+    bool owlSelected = false;
 
     int myPlayerId;
 
@@ -101,6 +116,14 @@
         opponents = otherPlayers;
     }
 
+    private void OwlCheckboxChanged(ChangeEventArgs args)
+    {
+        // use the owl checkbox 'selected' state to allow/disallow use of the owl
+        owlSelected = (bool)args.Value;
+        Console.WriteLine("owl unleashed : " + owlSelected);
+    }
+
+    /*
     private void CheckboxChanged(ChangeEventArgs args)
     {
         // get the checkbox state to enable/disable start button
@@ -113,6 +136,39 @@
         {
             numOpponents--;
         }
+    }
+    */
+    private void CheckboxChanged_after(SelectedPlayer sp)
+    {
+        // get the checkbox state to enable/disable start button
+        // and to activate or deactivate (and unselect) the owl option
+
+        int nHumans = 0;
+        int nComputers = 0;
+        foreach (var oPlayer in opponents)
+        {
+            if (oPlayer.Selected)
+            {
+                if (oPlayer.Player.IsComputerPlayer)
+                    nComputers++;
+                else
+                    nHumans++;
+            }
+        }
+
+        if (nHumans > 0 && nComputers == 0)
+        {
+            owlDisabled = false;
+        }
+        else
+        {
+            owlSelected = false;
+            owlDisabled = true;
+        }
+
+        numOpponents = nHumans + nComputers;
+        Console.WriteLine("humans:" + nHumans + " computers:" + nComputers + " total:" + numOpponents +
+                          " owl selected:" + owlSelected + " owlDisabled:" + owlDisabled);
     }
 
     private async Task Submit()
@@ -128,7 +184,7 @@
         Console.WriteLine($"Starting new game with {playerIdList.Count} players, skill level {(int)proficiency.Level}");
         try
         {
-            var uri = $"/api/NewGame?skill={(int)proficiency.Level}";
+            var uri = $"/api/NewGame?skill={(int)proficiency.Level}&owl={(bool)owlSelected}";
             var response = await Http.PostAsJsonAsync<List<int>>(uri, playerIdList);
             if (!response.IsSuccessStatusCode)
             {
@@ -145,7 +201,6 @@
             errorMessage = $"Something went wrong: {ex.Message}";
             Console.WriteLine(ex.ToString());
         }
-
     }
 
     private class SelectedPlayer

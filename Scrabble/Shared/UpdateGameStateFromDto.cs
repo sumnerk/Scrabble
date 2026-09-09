@@ -10,7 +10,6 @@ namespace Scrabble.Shared
     /// </summary>
     public class UpdateGameStateFromDto
     {
-
         public static void UpdateGameState(GameState currentGameState, GameStateDto gameStateDto)
         {
             currentGameState.TileBag = gameStateDto.GameBag;
@@ -30,6 +29,7 @@ namespace Scrabble.Shared
             currentGameState.LastMoveResult = gameStateDto.LastMoveResult;
             currentGameState.FinalGameStatus = gameStateDto.FinalGameStatus;
             currentGameState.RecentMoves = gameStateDto.RecentMoves;
+            currentGameState.AllowOwl = gameStateDto.AllowOwl;
             if (gameStateDto.ListOfRecentMoves != null)
             {
                 currentGameState.ListOfRecentMoves = gameStateDto.ListOfRecentMoves;

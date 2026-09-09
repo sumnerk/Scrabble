@@ -1,10 +1,17 @@
 ﻿<div draggable="@((!TilePiece.PinnedOnBoard).ToString())" @ondblclick="DoubleClick" @onclick="Click" id="@TilePiece.ID" class="square-space tile-container @NewTilePlacementMarkup @TileRackMarkup">
     
-    <div class="tile-content @BlankTileMarkup">
+    <div class="tile-content @BlankTileMarkup @HighValueTileMarkup">
         @TilePiece.Letter
         @if (TilePiece.Score > 0)
         {
-            <div class="tile-content-score">@TilePiece.Score</div>
+		    if (TilePiece.Score >=5)
+			{
+                <div class="high-value-tile-score">@TilePiece.Score</div>
+			}
+			else
+			{
+                <div class="tile-content-score">@TilePiece.Score</div>
+	        }
         }
         @if (TilePiece.MoveScore.HasValue)
         {
@@ -26,6 +33,8 @@
 @code {
     [Parameter] public Tile TilePiece { get; set; }
 
+    private string HighValueTileMarkup{ get; set; }
+	
     private string BlankTileMarkup{ get; set; }
 
     private string NewTilePlacementMarkup { get; set; }
@@ -36,7 +45,7 @@
 
     public override async Task SetParametersAsync(ParameterView parameters)
     {
-
+        HighValueTileMarkup = "";
         BlankTileMarkup = "";
         NewTilePlacementMarkup = "";
         TileRackMarkup = "";
@@ -50,6 +59,10 @@
                 if (tilePiece.Score == 0)
                 {
                     BlankTileMarkup = "tile-content-blank";
+                }
+                if (tilePiece.Score >= 5)  // K, J, X, Q, Z
+                {
+                    HighValueTileMarkup = "high-value-tile-letter";
                 }
                 if (tilePiece.NewPlacement)
                 {

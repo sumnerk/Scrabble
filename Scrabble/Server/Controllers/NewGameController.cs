@@ -32,15 +32,17 @@ namespace Scrabble.Server.Controllers
         /// <returns>New game GameDto id</returns>
         [HttpPost]
 
-        public async Task<int> NewGame([FromQuery] int skill, [FromBody] List<int> gamePlayerIds)
+        public async Task<int> NewGame([FromQuery] int skill, [FromQuery] bool owl, [FromBody] List<int> gamePlayerIds)
         {
             Console.WriteLine($"NewGameController.NewGame called with skill {skill} and player IDs {string.Join(",", gamePlayerIds)}");
+            Console.WriteLine($"Owl assisted ? " + owl);
+
             var players = await (from pl in scrabbleDb.Players
                                  where gamePlayerIds.Any(g => g == pl.PlayerId)
                                  select pl).ToListAsync();
 
             OrderPlayersAs(players, gamePlayerIds);
-            var gameId = await CreateNewGame(players, skill);
+            var gameId = await CreateNewGame(players, skill, owl);
             return gameId;
         }
 
@@ -82,7 +84,7 @@ namespace Scrabble.Server.Controllers
             return foundIndex;
         }
 
-        private async Task<int> CreateNewGame(List<Data.Player> players, int skill)
+        private async Task<int> CreateNewGame(List<Data.Player> players, int skill, bool owl)
         {
             // Find ID of player requesting new game
             var email = User.FindFirst(AppEmailClaimType.ThisAppEmailClaimType).Value;
@@ -115,8 +117,9 @@ namespace Scrabble.Server.Controllers
             var newGame = new GameState(gamePlayers, Utility.WordLookupSingleton.Instance);
             Setup.SetupComputer(newGame);
             newGame.LastMoveResult = newGame.Start(requestingPlayer.PlayerId);  // Computer moves already if wins the draw
+            newGame.AllowOwl = owl;
 
-            var gameStateDto = new  GameStateDto(newGame);
+            var gameStateDto = new GameStateDto(newGame);
             var gameStateSerialized = JsonConvert.SerializeObject(gameStateDto);
 
             var game = new Data.Game();
@@ -141,8 +144,5 @@ namespace Scrabble.Server.Controllers
 
             return gameId;
         }
-
-
     }
-
 }

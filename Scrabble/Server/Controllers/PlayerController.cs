@@ -31,11 +31,11 @@ namespace Scrabble.Server.Controllers
         [Authorize]
         public async Task<ActionResult<PlayerDto>> Get()
         {
-
-
             var userName = User.FindFirst(System.Security.Claims.ClaimTypes.Name).Value;
             //var userName = User.FindFirst("name").Value;
             var email = User.FindFirst(AppEmailClaimType.ThisAppEmailClaimType).Value;
+
+            //Console.WriteLine("PlayerController : " + userName);
 
             if (string.IsNullOrEmpty(email))
             {

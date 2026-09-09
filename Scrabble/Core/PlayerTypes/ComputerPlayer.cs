@@ -185,7 +185,7 @@ namespace Scrabble.Core.Types
 
                 // why not test if TileBag.Inventory.Count > Tiles.Count or some other calc to
                 // assess whether swapping makes any sense eg 6 tiles in bag and 7 to swap - maybe yes
-                // if 1 tile in bag and 5 in rack, perhaps not so then chose to pass
+                // if 1 tile in bag and 5 in rack, perhaps not so then choose to pass
                 // also if we decide explicitly to pass or exchange then the PerformDumpLetters method
                 // can be cleaned up because at the moment it is deciding on pass or exchange
 

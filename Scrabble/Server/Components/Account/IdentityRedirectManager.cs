@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Scrabble.Server.Data;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
