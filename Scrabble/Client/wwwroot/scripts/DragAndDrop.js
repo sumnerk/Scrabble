@@ -2,16 +2,17 @@
 //  Square game board on maximized desktop window should not create vertical scrollbar
 //  Square game board on portrait mobile layout should extend to left and right margin
 //     Landscape mobile not implemented
-//const ExtraVerticalSpace = 100;
-var playerRows = 1;
+var initialDisplay = true;
 
 function handleWindowSize()
 {
     var browserHeight = window.innerHeight;
     var browserWidth = window.innerWidth;
+    var devicePixelRatio = window.devicePixelRatio;
+    console.log(" ");
     console.log("---");
     console.log("Browser dimensions:")
-    console.log("   width=" + browserWidth + ", height=" + browserHeight);
+    console.log("   width=" + browserWidth + ", height=" + browserHeight + ", pixelRatio=" + devicePixelRatio);
 
     var gameArea = document.getElementById('game');
     if (!gameArea)
@@ -70,7 +71,7 @@ function handleWindowSize()
     */
 
     /* size the board */
-    var boardSide = 0;
+    var boardSize = 0;
 
     var newHeight = browserHeight;
     var adjHeight = 2 * (gamePlayRowHeight + actionButtonsRowHeight);
@@ -85,69 +86,99 @@ function handleWindowSize()
     }
 
     newWidth -= adjWidth;
-    boardSide = Math.min(newWidth, newHeight);
+    boardSize = Math.min(newWidth, newHeight);
 
-    console.log("*** new width=" + newWidth + ", new height=" + newHeight + ", board side=" + boardSide);
+    console.log("*** new width=" + newWidth + ", new height=" + newHeight + ", board size=" + boardSize);
 
-    if (boardSide < 540)
+    // numbers in px units...
+    const MIN_SQUARE_SIZE = 32;
+    // this is the padding between each row and column - it doesn't allow for padding
+    // to the left of the leftmost cell or to the right of the rightmost
+    const squarePadding = 2;
+    // here we account for unaccounted for border on the left and right hand cells and add
+    // an extra 2 pixels for a complete 2 pixel wide border around the whole grid
+    const gridBorderPadding = squarePadding + 2;
+    // and then give the whole thing a 3px wide red border...
+    const gridBorderWidth = 3;
+    // and it all adds up to...
+    const PADDING_AND_WIDTH = 14 * squarePadding + 2 * gridBorderPadding + 2 * gridBorderWidth;
+    // giving a minimum value for the board size of...
+    var minBoardSize = 15 * MIN_SQUARE_SIZE + PADDING_AND_WIDTH;
+    if (boardSize < minBoardSize && !initialDisplay)
     {
         // Don't resize if the game area is too small
+        console.log("!!! 'board size' value is too small (min. " + minBoardSize + ") - NOT resizing !!!");
         return;
     }
 
-    gameArea.style.height = boardSide + "px";
-    gameArea.style.width = boardSide + "px";
+    initialDisplay = false;
 
+    var squarePaddingPx = squarePadding + "px";
+    var gridBorderPaddingPx = gridBorderPadding + "px";
+    //for testing - gridBorderPaddingPx = "0px";
+    var gridBorderWidthPx = gridBorderWidth + "px";
 
-    // i wonder what all the following variables are for
-    // some are fairly obvious but maybe some of the less obvious ones
-    // might be the reason for the double tile drop issue perhaps due
-    // to a rounding error in a size causing issues with cursor
-    // position events during drag and drop ?
-    // when triggered, two tiles are dropped onto adjacent cells of the
-    // board and the large tile being dragged from the tile rack is not
-    // cleared down
-    // perhaps the innerSquareSize is too close in dimensions to the
-    // squareSize, so let's reduce by 2 pixels rather than 1 and see what
-    // happens - it might make drag and drop less responsive/accurate ?
-    var pixelWidth = Math.floor(boardSide / 15) - 1;
+    document.documentElement.style.setProperty('--row-column-gap', squarePaddingPx);
+    document.documentElement.style.setProperty('--grid-border-padding', gridBorderPaddingPx);
+    document.documentElement.style.setProperty('--grid-border-width', gridBorderWidthPx);
 
-    var squareSize = pixelWidth + "px";
-    var innerSquareSize = (pixelWidth - 2) + "px";
+    // the size of the main board tile in px
+    var squareSize = Math.floor((boardSize - PADDING_AND_WIDTH) / 15);
 
-    // next three relate to the DL,DW,TL,TW squares
-    var overscanPixels = Math.round(pixelWidth * 0.14);
-    var oversizeMarker = (pixelWidth + overscanPixels * 2 - 1) + "px";
-    var overscanSize = -overscanPixels + "px";
+    // don't let tiles get too small
+    if (squareSize < MIN_SQUARE_SIZE) squareSize = MIN_SQUARE_SIZE;
 
-    var tileFontSize = ((pixelWidth * 7) / 10) + "px";
-    var tileScoreFontSize = ((pixelWidth * 4) / 10) + "px";
-    var squareFontSize = ((pixelWidth * 5) / 10) + "px";
+    // re-compute board size now that squareSize has been decided
+    boardSize = 15 * squareSize + PADDING_AND_WIDTH;
+    console.log("adjusted board size=" + boardSize);
 
-    // make tile rack size slightly smaller as the tile rack area is slightly
-    // wider than the board so when a tile is moved to be placed it causes the
-    // board size to be recalculated! (also it looks neater - no overhang)
-    // previously it was (pixelWidth * 5) / 10
-    var tileRackSize = (pixelWidth + Math.floor((pixelWidth * 4) / 10)) + "px";
+    gameArea.style.height = boardSize + "px";
+    gameArea.style.width = boardSize + "px";
 
-    console.log("pixelWidth=" + pixelWidth + ", (x 0.14)=" + pixelWidth * 0.14);
-    console.log("squareSize=" + squareSize + ", innerSquareSize=" + innerSquareSize);
-    console.log("overscanPixels=" + overscanPixels + ", oversizeMarker=" + oversizeMarker + ", overscanSize=" + overscanSize);
-    console.log("tileFontSize=" + tileFontSize + ", tileScoreFontSize=" + tileScoreFontSize + ", squareFontSize=" + squareFontSize);
-    console.log("tileRackSize=" + tileRackSize);
+    // the size of the rack tile in px (30% bigger)
+    var rackSize = Math.floor(1.3 * squareSize);
+    // but the font size 20% bigger
+    var rackFontSize = Math.floor(1.2 * squareSize);
 
-    var gridBorderPadding = (2 + overscanPixels) + "px";
-    //gridBorderPadding = "0px";
-    document.documentElement.style.setProperty('--grid-border-padding', gridBorderPadding);
+    var squareSizePx = squareSize + "px";
+    var rackSizePx = rackSize + "px";
 
-    document.documentElement.style.setProperty('--square-space', squareSize);
-    document.documentElement.style.setProperty('--inner-square-size', innerSquareSize);
-    document.documentElement.style.setProperty('--oversize-square-size', oversizeMarker);
-    document.documentElement.style.setProperty('--overscan-size', overscanSize);
-    document.documentElement.style.setProperty('--tile-font-size', tileFontSize);
-    document.documentElement.style.setProperty('--tile-score-font-size', tileScoreFontSize);
-    document.documentElement.style.setProperty('--square-font-size', squareFontSize);
-    document.documentElement.style.setProperty('--tile-rack-size', tileRackSize);
+    // the next two relate to the special multiplier squares - DL,DW,TL,TW
+    // they are the basic square size + an extra contribution to account for the "zigzag" annotation
+    // that indicates a double or triple multiplier
+    var multiplierSquareOffset = 2 * (squarePadding + 1);
+    var multiplierSquareSizePx = (squareSize + 2 * multiplierSquareOffset) + "px";
+    // this is an offset to position the "oversized" special multiplier squares correctly on the board
+    var multiplierSquareOffsetPx = (-1 * multiplierSquareOffset) + "px";
+
+    console.log("squareSizePx=" + squareSizePx + ", rackSizePx=" + rackSizePx);
+    console.log("multiplierSquareSizePx=" + multiplierSquareSizePx + ", multiplierSquareOffsetPx=" + multiplierSquareOffsetPx);
+
+    document.documentElement.style.setProperty('--square-size', squareSizePx);
+    document.documentElement.style.setProperty('--tile-rack-size', rackSizePx);
+
+    document.documentElement.style.setProperty('--multiplier-square-size', multiplierSquareSizePx);
+    document.documentElement.style.setProperty('--multiplier-square-offset', multiplierSquareOffsetPx);
+
+    // font sizes for a board letter and its value...
+    var boardLetterFs = Math.floor(0.7 * squareSize);
+    var boardLetterValueFs = Math.floor(0.35 * squareSize);
+    // the 'annotation' font size is for the text in the DL, DW, TL, TW squares
+    var boardSquareAnnotationFs = Math.floor(0.5 * squareSize);
+    document.documentElement.style.setProperty('--board-letter-fs', boardLetterFs + "px");
+    document.documentElement.style.setProperty('--board-letter-value-fs', boardLetterValueFs + "px");
+    document.documentElement.style.setProperty('--board-square-annotation-fs', boardSquareAnnotationFs + "px");
+    console.log("board-letter-fs=" + boardLetterFs + ", board-letter-value-fs=" + boardLetterValueFs + ", board-square-annotation-fs=" + boardSquareAnnotationFs);
+
+    // font sizes for a rack letter and its value...
+    // ...so that everything is in better proportion when displayed on a tile in the rack
+    var rackLetterFs = Math.floor(0.7 * rackFontSize);
+    var rackLetterValueFs = Math.floor(0.35 * rackFontSize);
+    document.documentElement.style.setProperty('--rack-letter-fs', rackLetterFs + "px");
+    document.documentElement.style.setProperty('--rack-letter-value-fs', rackLetterValueFs + "px");
+    console.log("rack-letter-fs=" + rackLetterFs + ", rack-letter-value-fs=" + rackLetterValueFs);
+    console.log("---");
+    console.log(" ");
 }
 
 
@@ -616,29 +647,51 @@ var DragDropTouch;
 /* End of touch -> drag/drop ------------------------ */
 
 
-var dragSrcElement;
+var dndDebugging = false;
+
+function logMessage(msg) {
+    if (!dndDebugging)
+        return;
+    console.log(msg);
+}
+
+function getTileLetter(parent) {
+    if (parent.hasChildNodes()) {
+        return "[" + parent.firstChild.textContent + "]";
+    }
+}
+
+// previously if you dragged a tile that is placed on the board you would get 
+// a dragstart event for the Tile followed by a dragstart event for the Square
+// so there was code in place to block the events related to a Square and allow
+// the Tile event to proceed
+// but subsequently you might get one dragend event or sometimes two...
+// to address this dragstart listener for "Square" has been removed (no reason to drag a Square)
+// in addition the board is managed in such a way that Squares are deregistered as
+// drop sites once they are occupied during game play (and at start up if the board
+// is partly complete e.g. if a game is reloaded the event handlers are not registerd at all)
 
 export function handleDragStart(e) {
     var draggedId = this.getAttribute('id');
-    if (draggedId.startsWith('Square')) {
-        e.stopPropagation();  // Reject drag; allow tile nested in square to be dragged
-        return;
-    }
+
+    logMessage(" ");
+    logMessage("< < <");
+    logMessage("handleDragStart for '" + draggedId + "' " + getTileLetter(this));
 
     this.style.opacity = '0.4';
-    dragSrcElement = this;
 
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', draggedId);
 }
 
-
 export function handleDragEnd(e) {
+    var draggedId = this.getAttribute('id');
+    logMessage("handleDragEnd for '" + draggedId + "' " + getTileLetter(this));
+
     this.style.opacity = '1';
 
-    //items.forEach(function (item) {
-    //    item.classList.remove('over');
-    //});
+    logMessage("> > >");
+    logMessage(" ");
 }
 
 export function handleDragOver(e) {
@@ -655,33 +708,33 @@ export function handleDragOver(e) {
 //}
 
 export async function handleDrop(e) {
+    //var locationId = this.getAttribute('id');
     var dragId = e.dataTransfer.getData('text/plain');
     var dropId = this.getAttribute('id');
+    //logMessage("handleDrop @ '" + locationId + "' for : dragId(source) '" + dragId + "' -> dropId(target) '" + dropId + "'");
+    logMessage("handleDrop for : dragId(source) '" + dragId + "' -> dropId(target) '" + dropId + "'");
 
     if (!dragId || !dropId) return;
 
-    if (dropId.startsWith('Square')) {
-        var containedTiles = this.getElementsByClassName('tile-container');
-        if (containedTiles.length > 0) {
-            // Contains a tile - reference the tile as target
-            dropId = containedTiles[0].getAttribute('id');
-        }
-    }
     e.stopPropagation();
 
-    if (dragSrcElement !== this) {
-
+    // if drag didn't take the tile out of its current home on the board then
+    // the two id values will be equal. if they are not then there is work to do to notify dotnet
+    // note that the async nature of the dotnet call means that sometimes the dragend event handler
+    // is called before the await returns (so any messages being logged could be out of sequence)
+    if (dragId != this.getAttribute('id')) {
         // Notify dotnet
         await DotNet.invokeMethodAsync("Scrabble.Client", "HandleDropAsync", dragId, dropId);
     }
+    else {
+        console.log("handleDrop : this and dragId are the same '" + dragId + "' " + getTileLetter(this));
+    }   
 }
-
 
 // Allow focus set to element
 export function SetFocusToElement(element) {
     element.focus();
 };
-
 
 
 // Disable context menu for tiles by interception
@@ -699,44 +752,103 @@ function OnContextMenu(e) {
     return false;
 };
 
-
-export function SetEventListeners() {
-    let squares = document.querySelectorAll('.square, .center-square-container');
-    squares.forEach(function (square) {
-        square.addEventListener('dragstart', handleDragStart);
-        square.addEventListener('dragover', handleDragOver);
-        //square.addEventListener('dragenter', handleDragEnter);
-        //square.addEventListener('dragleave', handleDragLeave);
-        square.addEventListener('dragend', handleDragEnd);
-        square.addEventListener('drop', handleDrop);
-    });
-    let tiles = document.querySelectorAll('.tile-container');
-    tiles.forEach(function (tile) {
-        tile.addEventListener('dragstart', handleDragStart);
-        tile.addEventListener('dragover', handleDragOver);
-        //tile.addEventListener('dragenter', handleDragEnter);
-        //tile.addEventListener('dragleave', handleDragLeave);
-        tile.addEventListener('dragend', handleDragEnd);
-        tile.addEventListener('drop', handleDrop);
-        // Prevent context on tile for mobile
-        tile.addEventListener('contextmenu', function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-        }, true);
-    });
+export function RmEventListenerForSquare(squareIdList) {
+    // squareIdList passed as a semicolon delimited list of SquareId  and TileId values
+    // i.e. Square,1,1;Square,2,1;Tile,39; ...
+    var squares = squareIdList.split(";");
+    for (var i = 0; i < squares.length; i++) {
+        //logMessage("JS removeEventListener for '" + squares[i] + "'")
+        if (squares[i].startsWith("Square")) {
+            let sq = document.getElementById(squares[i]);
+            //sq.removeEventListener('dragover', handleDragOver);
+            //sq.removeEventListener('drop', handleDrop);
+            MyRemoveEventListenerByIdAndType(sq, 'dragover');
+            MyRemoveEventListenerByIdAndType(sq, 'drop');
+        }
+        else if (squares[i].startsWith("Tile")) {
+            let tl = document.getElementById(squares[i]);
+            MyRemoveEventListenerByIdAndType(tl, 'dragstart');
+            MyRemoveEventListenerByIdAndType(tl, 'dragover');
+            MyRemoveEventListenerByIdAndType(tl, 'dragend');
+            MyRemoveEventListenerByIdAndType(tl, 'drop');
+            // context on tile for mobile
+            MyRemoveEventListenerByIdAndType(tl, 'contextmenu');
+            /*
+            tl.removeEventListener('dragstart', handleDragStart);
+            tl.removeEventListener('dragover', handleDragOver);
+            tl.removeEventListener('dragend', handleDragEnd);
+            tl.removeEventListener('drop', handleDrop);
+            // context on tile for mobile
+            tl.removeEventListener('contextmenu', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }, true); */
+        }
+    }
 }
 
+export function SetEventListeners() {
+    // this function called once
+    // either for a new game where the board is blank or
+    // when setting up a partially played game
+    // for the former, all 225 squares will be set up with dragover and drop event handlers
+    // for the latter, only unoccupied squares will be set up with dragover and drop event handlers
+    // unlike previously the tiles on the tile rack will NOT have event handlers set up as this
+    // is taken care of by the C# code
+    var oc = 0;
+    var noc = 0;
+    let sqs = document.querySelectorAll('.square');
+    sqs.forEach(function (sq) {
+        let tls = sq.querySelectorAll('.tile-container');
+        if (tls.length > 0) {
+            oc++;
+        }
+        else {
+            noc++;
+            //sq.addEventListener('dragover', handleDragOver);
+            //sq.addEventListener('drop', handleDrop);
+            MyAddEventListener(sq, 'dragover', handleDragOver);
+            MyAddEventListener(sq, 'drop', handleDrop);
+        }
+    });
+
+    console.log(oc + " occupied");
+    console.log(noc + " not occupied");
+}
+
+function showTileTextContent(parent, msg) {
+    var details = "";
+    if (parent.hasChildNodes()) {
+        /*let children = parent.childNodes;
+        for (const node of children) {
+            details = details + node.textContent + " ";
+        }*/
+        details = parent.firstChild.textContent;
+    }
+    console.log(msg + " [" + details + "]");
+}
 
 export function SetTileForDrop(tileId) {
     let tile = document.getElementById(tileId);
     if (!tile) {
-        console.log('Unable to get tile Id: ' + tileId);
+        console.log("(JS) Unable to find tileId '" + tileId + "' in DOM");
         return; // Logic error
     }
+    //showTileTextContent(tile, "(JS) Enable DnD for tileId '" + tileId + "'");
+
+    MyAddEventListener(tile, 'dragstart', handleDragStart);
+    MyAddEventListener(tile, 'dragover', handleDragOver);
+    MyAddEventListener(tile, 'dragend', handleDragEnd);
+    MyAddEventListener(tile, 'drop', handleDrop);
+
+    // Prevent context on tile for mobile
+    MyAddEventListener(tile, 'contextmenu', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }, true);
+/*
     tile.addEventListener('dragstart', handleDragStart);
     tile.addEventListener('dragover', handleDragOver);
-    //tile.addEventListener('dragenter', handleDragEnter);
-    //tile.addEventListener('dragleave', handleDragLeave);
     tile.addEventListener('dragend', handleDragEnd);
     tile.addEventListener('drop', handleDrop);
 
@@ -745,23 +857,17 @@ export function SetTileForDrop(tileId) {
         event.preventDefault();
         event.stopPropagation();
     }, true);
+    */
 }
 
-
-
-export async function InitializeDragAndDrop(nPlayerRows) {
+export async function InitializeDragAndDrop() {
     // Delayed initialize to ensure browser rendering complete
-    playerRows = nPlayerRows;
     setTimeout(() => {
         SetEventListeners(); // For tiles
-
         handleWindowSize();  // Auto size game board to window/browser layout
         window.onresize = handleWindowSize;
-    }, 750);
-
+    }, 1000);
 }
-
-
 
 
 async function createBlobFromURL(url) {
@@ -800,6 +906,114 @@ export function playSound(audioFilename) {
 }
 
 
+
+
+
+// Track event listeners
+var evtDebugging = false;
+var my_listeners = {};
+class MyHandler {
+    // Each handler has four properties. the object itself, its attribute e.g. Tile,41
+    // the handler function and any options
+    // the "primary key" is the attr_id so for each type of event there should only be
+    // one handler registered for it at any time
+    constructor(obj_id, attr_id, fn, options){
+        this.obj_id = obj_id
+        this.attr_id = attr_id
+        this.fn = fn
+        this.options = options
+    }
+}
+function MyAddEventListener(obj_id, type, fn, options)
+{
+    var attr_id = obj_id.getAttribute("id");
+    var letter = "";
+    if (attr_id.startsWith("Tile"))
+        letter = getTileLetter(obj_id);
+
+    if (!my_listeners[type])
+        my_listeners[type] = [];
+
+    var index = -1;
+    for (let i = 0; i < my_listeners[type].length; i++)
+    {
+        if (my_listeners[type][i].attr_id == attr_id)
+        {
+            index = i;
+            break;
+        }
+    }
+    var handler = new MyHandler(obj_id, attr_id, fn, options);
+    var action = "Add";
+    if (index == -1)
+        my_listeners[type].push(handler);
+    else
+    {
+        action = "Update";
+        // remove the old handler from the object - nope. it seems to cause issues with some DnD scenarios
+        // feels like there is an issue being obscured here with timing of callbacks etc which will bite
+        // on occasions?
+        // ~~ my_listeners[type][index].obj_id.removeEventListener(type, my_listeners[type][index].fn, my_listeners[type][index].options);
+
+        // update our list for the object with the new handler
+        my_listeners[type][index] = handler;
+    }
+
+    // register/re-register the handler
+    obj_id.addEventListener(type, fn, options);
+    if (evtDebugging)
+        console.log(action + " handler for '" + attr_id + letter + "' [" + type + "/" + my_listeners[type].length +"]");
+}
+function MyRemoveAllEventListeners()
+{
+    if (evtDebugging)
+        console.log("(JS) RemoveAllEventListeners");
+    MyRemoveEventListenerByType('dragstart');
+    MyRemoveEventListenerByType('dragover');
+    MyRemoveEventListenerByType('dragend');
+    MyRemoveEventListenerByType('drop');
+    MyRemoveEventListenerByType('contextmenu');
+}
+function MyRemoveEventListenerByType(type)
+{
+    if (!my_listeners[type] || !my_listeners[type].length)
+        return;
+
+    for (let i = 0; i < my_listeners[type].length; i++)
+    {
+        var handler = my_listeners[type][i];
+        handler.obj_id.removeEventListener(type, handler.fn, handler.options);
+    }
+    if (evtDebugging)
+        console.log("(JS) RmByType removed "+ my_listeners[type].length +" [" + type + "] listeners");
+
+    my_listeners[type] = [];
+}
+function MyRemoveEventListenerByIdAndType(obj_id, type)
+{
+    var attr_id = obj_id.getAttribute("id");
+    var letter = "";
+    if (attr_id.startsWith("Tile"))
+        letter = getTileLetter(obj_id);
+
+    if (!my_listeners[type] || !my_listeners[type].length)
+        return;
+
+    for (let i = 0; i < my_listeners[type].length; i++)
+    {
+        if (my_listeners[type][i].attr_id == attr_id)
+        {
+            var handler = my_listeners[type][i];
+            handler.obj_id.removeEventListener(type, handler.fn, handler.options);
+            // remove the item from the list
+            my_listeners[type].splice(i, 1);
+            if (evtDebugging)
+                console.log("RmByIdAndType for '" + attr_id + letter + "' [" + type + "/" + my_listeners[type].length +"]");
+            break;
+        }
+    }
+}
+
 var removeAllEventListener = function (type) {
     if (!listeners[type] || !listeners[type].length)
         return;
@@ -814,11 +1028,17 @@ var removeAllEventListener = function (type) {
 // Remove event listeners to prevent an unlimited number of
 // event listeners when switching between multiple games
 export async function CleanupDragAndDrop() {
+    if (evtDebugging)
+        console.log("(JS) CleanupDragAndDrop");
+    /* not sure this stuff was actually working...
     removeAllEventListener('dragstart');
     removeAllEventListener('dragover');
     removeAllEventListener('dragend');
     removeAllEventListener('drop');
     removeAllEventListener('contextmenu');
+    */
+
+    MyRemoveAllEventListeners();
 }
 
 

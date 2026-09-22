@@ -6,7 +6,7 @@ namespace Scrabble.Core.Squares
   public class NormalSquare : Square
   {
     public NormalSquare()
-      : base(1, 1, "square-space", "")
+              : base(1, 1, "", "")
     {
       NormalSquare normalSquare = this;
     }

@@ -5,26 +5,11 @@
 <div class="top-row px-0 navbar navbar-light">
     <div class="container-fluid">
         <span class="scrabble-bag-icon" aria-hidden="true"></span>
-@*
-        @if (!@IconMenuActive)
-        {
-            <span class="navbar-brand">Scrabble</span>
-        }
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-*@
     </div>
 </div>
 
-@*
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-*@
-
 <!-- there is no ToggleNavMenu method, so the menu is always expanded. -->
 <!-- The menu can be collapsed by clicking the chevron at the bottom of the menu -->
-<!-- <div class="@NavMenuCssClass" @onclick="ToggleNavMenu"> -->
 <div class="no-collapse">
     <nav class="flex-column">
         <div class="nav-item px-2">
@@ -129,16 +114,20 @@
     </nav>
 </div>
 
-<div class="bottom-row">
-    @if (!@IconMenuActive)
-    {
-        <span class="bi-nav-menu bi-chevron-double-left-nav-menu" title="Collapse Sidebar" @onclick="ToggleIconMenu"></span>
-    }
-    else
-    {
-        <span class="bi-nav-menu bi-chevron-double-right-nav-menu" title="Expand Sidebar" @onclick="ToggleIconMenu"></span>
-    }
-</div>
+<AuthorizeView>
+    <Authorized>
+        <div class="bottom-row">
+            @if (!@IconMenuActive)
+            {
+                <span class="bi-nav-menu bi-chevron-double-left-nav-menu" title="Collapse Sidebar" @onclick="ToggleIconMenu"></span>
+            }
+            else
+            {
+                <span class="bi-nav-menu bi-chevron-double-right-nav-menu" title="Expand Sidebar" @onclick="ToggleIconMenu"></span>
+            }
+        </div>
+    </Authorized>
+</AuthorizeView>
 
 
 @code {

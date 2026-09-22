@@ -1,0 +1,122 @@
+﻿<div draggable="@((!TilePiece.PinnedOnBoard).ToString())" @ondblclick="DoubleClick" @onclick="Click" id="@TilePiece.ID" class="tile-container @NewTilePlacementMarkup @TileRackMarkup">
+
+    <div class="@TileContent @BlankTileMarkup @HighValueTileMarkup">@TilePiece.Letter</div>
+
+    @if (TilePiece.Score > 0)
+    {
+        <div class="@TileScoreMarkup">@TilePiece.Score</div>
+    }
+
+    @if (TilePiece.MoveScore.HasValue)
+    {
+        <div class="@MoveMarkup">@TilePiece.MoveScore.Value</div>
+    }
+
+    @if (TilePiece.SelectedForSwap)
+    {
+        <div class="tile-x-out">
+            &nbsp;
+        </div>
+    }
+</div>
+
+
+@code {
+    [Parameter] public Tile TilePiece { get; set; }
+
+    private string TileContent { get; set; }
+
+    private string HighValueTileMarkup { get; set; }
+
+    private string BlankTileMarkup { get; set; }
+
+    private string NewTilePlacementMarkup { get; set; }
+
+    private string MoveMarkup { get; set; }
+
+    private string TileRackMarkup { get; set; }
+
+    private string TileScoreMarkup { get; set; }
+
+    public override async Task SetParametersAsync(ParameterView parameters)
+    {
+        TileContent = "tile-content_2 ";
+        HighValueTileMarkup = "";
+        BlankTileMarkup = "";
+        TileScoreMarkup = "";
+        NewTilePlacementMarkup = "";
+        TileRackMarkup = "";
+
+        if (parameters.TryGetValue<Tile>(nameof(TilePiece), out var tilePiece))
+        {
+            if (tilePiece is not null)
+            {
+                if (tilePiece.TileInRack) TileContent += "tile-rack-letter-fs";
+                else TileContent += "main-board-letter-fs";
+
+                // tile colours/style/size depending on "location" i.e. on the rack or on the board
+                if (tilePiece.NewPlacement)
+                {
+                    NewTilePlacementMarkup = "tile-container-recent";
+                }
+                if (tilePiece.TileInRack)
+                {
+                    TileRackMarkup = "rack-space";
+                }
+                else if (!tilePiece.PinnedOnBoard)
+                {
+                    NewTilePlacementMarkup = "tile-container-new";
+                }
+
+                // value of tile
+                if (tilePiece.Score == 0)
+                {
+                    BlankTileMarkup = "tile-content-blank";
+                }
+                else
+                {
+                    if (tilePiece.Score < 5)
+                    {
+                        TileScoreMarkup = "tile-content-score ";
+                    }
+                    else  // K, J, X, Q, Z
+                    {
+                        TileScoreMarkup = "high-value-tile-score ";
+                        HighValueTileMarkup = "high-value-tile-letter";
+                    }
+                    if (tilePiece.TileInRack) TileScoreMarkup += "tile-rack-letter-value-fs";
+                    else TileScoreMarkup += "main-board-letter-value-fs";
+                }
+
+                // score for the move
+                if (tilePiece.MoveScore.HasValue)
+                {
+                    if (tilePiece.PinnedOnBoard)
+                    {
+                        MoveMarkup = "tile-move-score-final";
+                    }
+                    else
+                    {
+                        MoveMarkup = "tile-move-score-placing";
+                    }
+                }
+            }
+        }
+
+        await base.SetParametersAsync(parameters);
+    }
+
+    /// <summary>
+    /// Click procedure is meant to select tile(s) from rack to swap.   Browser
+    /// passes 2 single clicks on the way to double click
+    /// </summary>
+    private void Click()
+    {
+        Pages.GameDisplay.HandleSingleClickOnTile(this.TilePiece.ID);
+    }
+
+    private void DoubleClick()
+    {
+        Pages.GameDisplay.HandleDoubleClickOnTile(this.TilePiece.ID);
+    }
+}

@@ -3,7 +3,6 @@
 @using System.Net
 @using System.Linq;
 
-
 <div class="container">
     <div class="alert alert-danger" role="alert" hidden="@HideAlert">
         @errorMessage
@@ -24,12 +23,11 @@
                 if (playerInfo.Player.IsPlayer)
                 {
                     <div>
-                        <!-- <InputCheckbox @bind-Value=@playerInfo.Selected @oninput="CheckboxChanged" /> -->
                         <InputCheckbox @bind-Value=@playerInfo.Selected @bind-Value:after="() => CheckboxChanged_after(playerInfo)" />
                         @playerInfo.Player.Name
                     </div>
                 }
-                if (playerInfo.Player.IsComputerPlayer)
+                if (playerInfo.Player.IsComputerPlayer && playerInfo.Selected)
                 {
                     <fieldset>
                         <InputRadioGroup @bind-Value=@proficiency.Level>
@@ -46,12 +44,12 @@
             }
             </div>
             <div class="col align-self-end d-flex justify-content-end">
-                <label>
+                @{string owl_is = owlDisabled ? "invisible" : "visible";}
+                <div class=@($"{owl_is}")>
                     <InputCheckbox @bind-Value=@owlSelected disabled=@owlDisabled @oninput="OwlCheckboxChanged" />
                     <span class="owl-checkbox-icon"></span> 
-                </label>
+                </div>
             </div>
-
         }
     </div>
 
@@ -123,26 +121,10 @@
         Console.WriteLine("owl unleashed : " + owlSelected);
     }
 
-    /*
-    private void CheckboxChanged(ChangeEventArgs args)
-    {
-        // get the checkbox state to enable/disable start button
-        var isChecked = (bool)args.Value;
-        if (isChecked)
-        {
-            numOpponents++;
-        }
-        else
-        {
-            numOpponents--;
-        }
-    }
-    */
     private void CheckboxChanged_after(SelectedPlayer sp)
     {
         // get the checkbox state to enable/disable start button
         // and to activate or deactivate (and unselect) the owl option
-
         int nHumans = 0;
         int nComputers = 0;
         foreach (var oPlayer in opponents)

@@ -81,6 +81,7 @@ namespace Scrabble.Shared
                 this.LastMoveScore = activePlayer.LastMoveScore;
                 this.Tiles = activePlayer.Tiles;
                 this.MyTurn= activePlayer.MyTurn;
+                this.MyMoveCount = activePlayer.MyMoveCount;
                 this.ActiveFlag = activePlayer.ActiveFlag;
                 // handle ActiveFlag setting for legacy games
                 if (String.IsNullOrEmpty(ActiveFlag)) ActiveFlag = "Y";
@@ -107,6 +108,7 @@ namespace Scrabble.Shared
             public int LastMoveScore { get; set; }
             public List<Tile> Tiles { get; set; }
             public bool MyTurn { get; set; }
+            public int MyMoveCount { get; set; }
 
             public int PlayerPasses { get; set; }
             public int Skill { get; set; }

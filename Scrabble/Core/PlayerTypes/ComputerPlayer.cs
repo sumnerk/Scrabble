@@ -71,14 +71,12 @@ namespace Scrabble.Core.Types
             : base(name, databaseId, email)
         {
             Skill = (int)SkillLevel.Expert;
-            PlayerPasses = 0;
         }
 
         public ComputerPlayer(string name, int databaseId, string email, int skill)
             : base(name, databaseId, email)
         {
             Skill = skill;
-            PlayerPasses = 0;
         }
 
         public override async void NotifyTurn(ITurnImplementor implementor, string lastMoveDetail)

@@ -6,7 +6,7 @@ namespace Scrabble.Core.Squares
     public class StartSquare : DoubleWordSquare
     {
         public StartSquare()
-            : base(1, 2, "square square-centre", "")
+            : base(1, 2, "black-star", "")
         {
         }
     }

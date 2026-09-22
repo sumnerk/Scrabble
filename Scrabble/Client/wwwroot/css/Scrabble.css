@@ -1,12 +1,11 @@
 /* ------------------------ */
 :root {
-    --square-space: 3vw;
-    --inner-square-size: 2.9vw;
-    --oversize-square-size: 3.8vw;
-    --overscan-size: .5vw;
-    --tile-font-size: 1.9vw;
-    --tile-score-font-size: 0.9vw;
-    --square-font-size: 1.4vw;
+    --square-size: 2rem;
+    --multiplier-square-size: 2.4rem;
+    --multiplier-square-offset: .5vw;
+    --board-letter-fs: 1.5rem;
+    --board-letter-value-fs: 0.25rem;
+    --board-square-annotation-fs: 1.5rem;
     --tile-rack-size: 5vw;
 }
 
@@ -131,22 +130,16 @@ textarea {
     background-color: purple;
 }
 
-.game-board {
-    display: grid;
-    grid-template-columns: repeat(15, var(--square-space, 3vw));
-    border: .4vw solid darkred;
-    padding: var(--grid-border-padding);
-}
 
 .professor-owl {
+    display: flex;
+    flex-direction: column;
     background-image: url("/Images/ProfessorOwl2.png");
     background-size: 100% 100%;
     width: var(--tile-rack-size, 5vw);
     height: var(--tile-rack-size, 5vw);
     color: white;
     text-align: center;
-    display: flex;
-    flex-direction: column;
     margin-right: 10px;
 }
 
@@ -164,9 +157,9 @@ textarea {
 }
 
 .owl-checkbox-icon {
+    display: inline-flex;
     background-image: url("/images/ProfessorOwl2.png");
     background-size: 100% 100%;
-    display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
@@ -174,22 +167,11 @@ textarea {
     height: 48px;
 }
 
+/*
 .tile-bag-area {
     display: inline-flex;
 }
-
-.tile-bag {
-    background-image: url("/Images/bag-green.png");
-    background-size: 100% 100%;
-    width: var(--tile-rack-size, 5vw);
-    height: var(--tile-rack-size, 5vw);
-    color: white;
-    text-align: center;
-    font-size: calc(var(--tile-rack-size)/4);
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-}
+    */
 
 
 .game-board-container {
@@ -198,248 +180,6 @@ textarea {
     flex-wrap: nowrap;
     justify-content: space-around;
     align-items: center;
-}
-
-
-.game-play-container {
-    display: flex;
-    justify-content: flex-start;
-    align-items: left;
-    margin-top: 16px;
-}
-
-.action-buttons-container {
-    display: flex;
-    justify-content: center;
-    margin-top: 12px;
-}
-
-.square-row {
-    display: flex !important;
-}
-
-.square-space {
-    display: inline-flex;
-    height: var(--square-space, 3vw);
-    width: var(--square-space, 3vw);
-    max-width: var(--square-space, 3vw);
-    border: 1px solid white;
-    vertical-align: top;
-    justify-content: center;
-    align-items: center;
-    overflow: visible;
-    cursor: default;
-    user-select: none;
-    font-size: var(--square-font-size, 0.9vw);
-    position: relative;
-    /* FFFFFFFF */
-}
-
-    .square-space .square {
-        background-color: beige;
-        width: var(--inner-square-size, 2.9vw);
-        height: var(--inner-square-size, 2.9vw);
-        position: absolute;
-        line-height: var(--inner-square-size, 2.9vw);
-    }
-
-    .square-space .center-square-container {
-        background-color: pink;
-        width: var(--inner-square-size, 2.9vw);
-        height: var(--inner-square-size, 2.9vw);
-        position: absolute;
-        line-height: var(--inner-square-size, 2.9vw);
-    }
-
-    .square-space .square.tile-last-move {
-        background-color: darkgoldenrod;
-    }
-
-    .square-space .square.tile-swapping {
-        top: -10px;
-        border: 1px solid black;
-    }
-
-.square.square-centre {
-    width: var(--inner-square-size, 2.9vw);
-    height: var(--inner-square-size, 2.9vw);
-    line-height: var(--inner-square-size, 2.9vw);
-    background-color: black;
-    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
-    transform: scale(0.70, 0.70);
-}
-
-.double-letter {
-    background-color: lightblue;
-    /*FF9696FF*/
-    position: absolute;
-    display: inline-grid;
-    width: var(--oversize-square-size, 3.8vw);
-    height: var(--oversize-square-size, 3.8vw);
-    top: var(--overscan-size, -.5vh);
-    left: var(--overscan-size, -.5vh);
-    z-index: 5;
-    clip-path: polygon( 12% 12%, 35% 12%, 42% 0%, 49% 12%, 57% 0%, 63% 12%, 88% 12%, 88% 36%, 100% 43%, 88% 50%, 100% 57%, 88% 64%, 88% 88%, 63% 88%, 56% 100%, 49% 88%, 42% 100%, 36% 88%, 12% 88%, 12% 64%, 0% 57%, 12% 50%, 0% 43%, 12% 36% );
-}
-
-
-.center-square-letter {
-    position: relative;
-    margin-top: auto;
-    margin-bottom: auto;
-}
-
-
-.triple-letter {
-    background-color: royalblue;
-    /* color: white; */
-    position: absolute;
-    display: inline-grid;
-    width: var(--oversize-square-size, 3.8vw);
-    height: var(--oversize-square-size, 3.8vw);
-    top: var(--overscan-size, -.5vh);
-    left: var(--overscan-size, -.5vh);
-    z-index: 5;
-    clip-path: polygon( 12% 12%, 29% 12%, 35% 0%, 42% 12%, 49% 0%, 57% 12%, 63% 0%, 70% 12%, 88% 12%, 88% 29%, 100% 36%, 88% 43%, 100% 50%, 88% 57%, 100% 64%, 88% 71%, 88% 88%, 71% 88%, 63% 100%, 56% 88%, 49% 100%, 42% 88%, 36% 100%, 29% 88%, 12% 88%, 12% 71%, 0% 64%, 12% 57%, 0% 50%, 12% 43%, 0% 36%, 12% 29% );
-}
-
-.double-word {
-    background-color: pink;
-    /*color: white;*/
-    position: absolute;
-    display: inline-grid;
-    width: var(--oversize-square-size, 3.8vw);
-    height: var(--oversize-square-size, 3.8vw);
-    top: var(--overscan-size, -.5vh);
-    left: var(--overscan-size, -.5vh);
-    z-index: 5;
-    clip-path: polygon( 12% 12%, 35% 12%, 42% 0%, 49% 12%, 57% 0%, 63% 12%, 88% 12%, 88% 36%, 100% 43%, 88% 50%, 100% 57%, 88% 64%, 88% 88%, 63% 88%, 56% 100%, 49% 88%, 42% 100%, 36% 88%, 12% 88%, 12% 64%, 0% 57%, 12% 50%, 0% 43%, 12% 36% );
-}
-
-.triple-word {
-    background-color: red;
-    color: black;
-    position: absolute;
-    display: inline-grid;
-    width: var(--oversize-square-size, 3.8vw);
-    height: var(--oversize-square-size, 3.8vw);
-    top: var(--overscan-size, -.5vh);
-    left: var(--overscan-size, -.5vh);
-    z-index: 5;
-    /*"FFFF0000"*/
-    clip-path: polygon( 12% 12%, 29% 12%, 35% 0%, 42% 12%, 49% 0%, 57% 12%, 63% 0%, 70% 12%, 88% 12%, 88% 29%, 100% 36%, 88% 43%, 100% 50%, 88% 57%, 100% 64%, 88% 71%, 88% 88%, 71% 88%, 63% 100%, 56% 88%, 49% 100%, 42% 88%, 36% 100%, 29% 88%, 12% 88%, 12% 71%, 0% 64%, 12% 57%, 0% 50%, 12% 43%, 0% 36%, 12% 29% );
-}
-
-.square.square-centre .tile-content {
-    left: 0;
-}
-
-.tile-content-blank {
-    color:darkred;
-}
-
-.high-value-tile-letter {
-    /*color:darkmagenta;*/
-    /*color:darkorchid;*/
-    color:blue;
-}
-
-.high-value-tile-score {
-    bottom: 1px;
-    right: 1px;
-    position: absolute;
-    /*color: black;*/
-    color:navy;
-}
-
-.square-multiplier1, .square-multiplier2, .tile-content-score, .high-value-tile-score {
-    font-size: var(--tile-score-font-size, 0.9vw);
-    line-height: 100%;
-}
-
-.square-multiplier1 {
-    bottom: 48%;
-    right: 52%;
-}
-
-.square-multiplier2 {
-    top: 48%;
-    left: 52%
-}
-
-.tile-container {
-    background-image: url("/Images/woodknots.jpg");
-    background-size: 100% 100%;
-    border-radius: .5vw;
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    margin: 0 auto;
-    text-align: center;
-    z-index: 10;
-}
-
-/* Most recently placed move */
-.tile-container-recent {
-    background-image: url("/images/woodknotsHighlight.jpg");
-}
-
-/* Current move tiles just dropped */
-.tile-container-new {
-    background-image: url("/images/woodknotsPlacing.jpg");
-}
-
-.tile-in-rack {
-    width: var(--tile-rack-size, 5vw);
-    max-width: var(--tile-rack-size, 5vw);
-    height: var(--tile-rack-size, 5vw);
-    margin: 2px;
-}
-
-.tile-x-out {
-    background-image: url("/Images/x-out.gif");
-    opacity: 0.6;
-    border-radius: .5vw;
-    position: absolute;
-    width: inherit;
-    height: inherit;
-    background-size: cover;
-    top: 0px;
-    left: 0px;
-    margin: 0 auto;
-    text-align: center;
-    z-index: 11;
-}
-
-.tile-content {
-    text-align: center;
-    font-size: var(--tile-font-size, 1.9vw);
-    font-weight: bolder;
-    width: inherit;
-    position: relative;
-    left: -2px;
-    line-height: 1.5em;
-}
-
-.blank-letter-selector {
-    display: inline-block;
-    height: var(--square-space, 3vw);
-    width: var(--square-space, 3vw);
-    background-image: url("/Images/woodknots.jpg");
-    background-size: 100% 100%;
-    border-radius: .5vw;
-    color: darkred;
-    text-align: center;
-    font-size: var(--tile-font-size, 0.9vw);
-    font-weight: bold;
-    font-style: normal;
-    cursor: pointer;
-    user-select: none;
-    margin: 3px;
-}
-
-.blank-letter-selector:hover {
-    color: red;
 }
 
 .scoreboard {
@@ -452,47 +192,6 @@ textarea {
     margin-right: auto;
 }
 
-/*for player tile row */
-.player-tiles {
-    display: flex;
-    position: relative;
-    background-color: white;
-}
-
-    .player-tiles .tile-container {
-        display: flex;
-        position: relative; /* Override absolute positioning on game square */
-        background-color: white;
-    }
-
-.tile-content-score {
-    bottom: 1px;
-    right: 1px;
-    position: absolute;
-}
-
-/* For move currently being placed */
-.tile-move-score-placing {
-    bottom: 1px;
-    left: 1px;
-    position: absolute;
-    font-size: var(--tile-score-font-size, 0.9vh);
-    line-height: 100%;
-    background-color: blue;
-    color: white;
-}
-
-/* For most recent completed move */
-.tile-move-score-final {
-    bottom: 1px;
-    left: 1px;
-    position: absolute;
-    font-size: var(--tile-score-font-size, 0.9vh);
-    line-height: 100%;
-    background-color: red;
-    color: white;
-}
-
 .game {
     text-align: center;
     margin-left: auto;
@@ -502,6 +201,400 @@ textarea {
     .game .game-element-container {
         display: inline-block;
     }
+
+.game-board {
+    display: grid;
+    grid-template-columns: repeat(15, var(--square-size));
+    gap: var(--row-column-gap, 2px);
+    padding: var(--grid-border-padding, 4px);
+    border: var(--grid-border-width, 3px) solid darkred;
+}
+
+.action-buttons-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 12px;
+}
+
+/*
+.square-row {
+    display: flex !important;
+}
+*/
+
+/* square-space and rack-space */
+/* the size of a letter piece on the board and on the rack */
+/* might make sense to rename square-space to board-space ? */
+.square-space {
+    width: var(--square-size);
+    height: var(--square-size);
+    cursor: default;
+    user-select: none;
+    /*min-width: var(--square-size);
+    min-height: var(--square-size);*/
+    /*
+    overflow: visible;
+    position: relative;
+        */
+}
+
+.rack-space {
+    width: var(--tile-rack-size);
+    height: var(--tile-rack-size);
+    cursor: default;
+    user-select: none;
+    /*min-width: var(--square-size);
+    min-height: var(--square-size);*/
+    /*
+    overflow: visible;
+    position: relative;*/
+}
+
+.square-space .square-space-normal {
+    display: grid;
+    width: var(--square-size);
+    height: var(--square-size);
+    background-color: beige;
+    position: absolute;
+}
+
+.square-space .square-space-centre {
+    display: grid;
+    width: var(--square-size);
+    height: var(--square-size);
+    background-color: pink;
+    position: relative;
+}
+
+.square-space .square-space-multiplier {
+    display: grid;
+    width: var(--square-size);
+    height: var(--square-size);
+    /* indigo or crimson colour is useful for debugging */
+    /*background-color: indigo;*/
+    position: relative;
+}
+
+        /*    .square-space .center-square-container {
+        background-color: pink;
+        width: var(--square-size, 2.9vw);
+        height: var(--square-size, 2.9vw);
+        line-height: var(--square-size, 2.9vw);
+        position: relative;
+    }
+    */
+/*
+    .square-space .square.tile-last-move {
+        background-color: darkgoldenrod;
+    }
+
+    .square-space .square.tile-swapping {
+        top: -10px;
+        border: 1px solid black;
+    }
+    */
+    /*
+.square.square-centre {
+    width: var(--square-size);
+    height: var(--square-size);
+    //line-height: var(--inner-square-size, 2.9vw);
+    /*background-color: black;
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    transform: scale(0.70, 0.70);
+}
+*/
+/*
+.center-square-letter {
+    position: relative;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+*/
+
+.black-star {
+    display: grid;
+    background-color: black;
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    transform: scale(0.70, 0.70);
+}
+
+.double-letter {
+    display:flex;
+    background-color: lightblue;
+    clip-path: polygon( 12% 12%, 35% 12%, 42% 0%, 49% 12%, 57% 0%, 63% 12%, 88% 12%, 88% 36%, 100% 43%, 88% 50%, 100% 57%, 88% 64%, 88% 88%, 63% 88%, 56% 100%, 49% 88%, 42% 100%, 36% 88%, 12% 88%, 12% 64%, 0% 57%, 12% 50%, 0% 43%, 12% 36% );
+    width: var(--multiplier-square-size);
+    height: var(--multiplier-square-size);
+    /*min-width: var(--multiplier-square-size);
+    min-height: var(--multiplier-square-size);*/
+    top: var(--multiplier-square-offset);
+    left: var(--multiplier-square-offset);
+    font-size: var(--board-square-annotation-fs);
+    justify-content: center;
+    align-items: center;
+    z-index: 5;
+    position: absolute;
+}
+
+.triple-letter {
+    display: flex;
+    background-color: royalblue;
+    clip-path: polygon( 12% 12%, 29% 12%, 35% 0%, 42% 12%, 49% 0%, 57% 12%, 63% 0%, 70% 12%, 88% 12%, 88% 29%, 100% 36%, 88% 43%, 100% 50%, 88% 57%, 100% 64%, 88% 71%, 88% 88%, 71% 88%, 63% 100%, 56% 88%, 49% 100%, 42% 88%, 36% 100%, 29% 88%, 12% 88%, 12% 71%, 0% 64%, 12% 57%, 0% 50%, 12% 43%, 0% 36%, 12% 29% );
+    width: var(--multiplier-square-size);
+    height: var(--multiplier-square-size);
+    /*min-width: var(--multiplier-square-size);
+    min-height: var(--multiplier-square-size);*/
+    top: var(--multiplier-square-offset);
+    left: var(--multiplier-square-offset);
+    font-size: var(--board-square-annotation-fs);
+    justify-content: center;
+    align-items: center;
+    z-index: 5;
+    position: absolute;
+}
+
+.double-word {
+    display: flex;
+    background-color: pink;
+    clip-path: polygon( 12% 12%, 35% 12%, 42% 0%, 49% 12%, 57% 0%, 63% 12%, 88% 12%, 88% 36%, 100% 43%, 88% 50%, 100% 57%, 88% 64%, 88% 88%, 63% 88%, 56% 100%, 49% 88%, 42% 100%, 36% 88%, 12% 88%, 12% 64%, 0% 57%, 12% 50%, 0% 43%, 12% 36% );
+    width: var(--multiplier-square-size);
+    height: var(--multiplier-square-size);
+    /*min-width: var(--multiplier-square-size);
+    min-height: var(--multiplier-square-size);*/
+    top: var(--multiplier-square-offset);
+    left: var(--multiplier-square-offset);
+    font-size: var(--board-square-annotation-fs);
+    justify-content: center;
+    align-items: center;
+    z-index: 5;
+    position: absolute;
+}
+
+.triple-word {
+    display: flex;
+    background-color: red;
+    clip-path: polygon( 12% 12%, 29% 12%, 35% 0%, 42% 12%, 49% 0%, 57% 12%, 63% 0%, 70% 12%, 88% 12%, 88% 29%, 100% 36%, 88% 43%, 100% 50%, 88% 57%, 100% 64%, 88% 71%, 88% 88%, 71% 88%, 63% 100%, 56% 88%, 49% 100%, 42% 88%, 36% 100%, 29% 88%, 12% 88%, 12% 71%, 0% 64%, 12% 57%, 0% 50%, 12% 43%, 0% 36%, 12% 29% );
+    width: var(--multiplier-square-size);
+    height: var(--multiplier-square-size);
+    /*min-width: var(--multiplier-square-size);
+    min-height: var(--multiplier-square-size);*/
+    top: var(--multiplier-square-offset);
+    left: var(--multiplier-square-offset);
+    font-size: var(--board-square-annotation-fs);
+    justify-content: center;
+    align-items: center;
+    z-index: 5;
+    position: absolute;
+}
+
+    .square.square-centre .tile-content {
+        left: 0;
+    }
+
+    .tile-content-blank {
+        color: darkred;
+    }
+
+    .high-value-tile-letter {
+        color: blue;
+    }
+
+    .high-value-tile-score {
+        color: navy;
+        bottom: 1px;
+        right: 1px;
+        position: absolute;
+    }
+    /*
+    .square-multiplier1, .square-multiplier2, .tile-content-score, .high-value-tile-score {
+        font-size: var(--board-letter-value-fs, 0.9vw);
+        line-height: 100%;
+    }
+
+    .square-multiplier1 {
+        bottom: 48%;
+        right: 52%;
+    }
+
+    .square-multiplier2 {
+        top: 48%;
+        left: 52%
+    }
+*/
+    .tile-content-score, .high-value-tile-score {
+        font-size: var(--board-letter-value-fs);
+        line-height: 100%;
+    }
+
+    .tile-container {
+        background-image: url("/Images/woodknots.jpg");
+        background-size: 100% 100%;
+        border-radius: 4px;
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        margin: 0 auto;
+        /*text-align: center;*/
+        justify-content: center;
+        align-items: center;
+        z-index: 10;
+    }
+    /* Most recently placed move */
+    .tile-container-recent {
+        background-image: url("/images/woodknotsHighlight.jpg");
+    }
+    /* Current move tiles just dropped */
+    .tile-container-new {
+        background-image: url("/images/woodknotsPlacing.jpg");
+    }
+
+    /*
+    .tile-in-rack {
+        width: var(--tile-rack-size, 5vw);
+        height: var(--tile-rack-size, 5vw);
+        max-width: var(--tile-rack-size, 5vw);
+        max-height: var(--tile-rack-size, 5vw);
+        margin: 2px;
+    }
+        */
+    .tile-x-out {
+        background-image: url("/Images/x-out.gif");
+        opacity: 0.6;
+        border-radius: 4px;
+        position: absolute;
+        width: inherit;
+        height: inherit;
+        background-size: cover;
+        top: 0px;
+        left: 0px;
+        margin: 0 auto;
+        text-align: center;
+        z-index: 11;
+    }
+
+    .tile-content {
+        text-align: center;
+        font-size: var(--board-letter-fs, 1.9vw);
+        font-weight: bolder;
+        width: inherit;
+        position: relative;
+        left: -2px;
+        line-height: 1.5em;
+    }
+
+    .tile-content_2 {
+        display: flex;
+        height: var(--square-size);
+        width: var(--square-size);
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+    }
+
+    .main-board-letter-fs {
+        font-size: var(--board-letter-fs);
+    }
+
+    .main-board-letter-value-fs {
+        font-size: var(--board-letter-value-fs);
+        font-weight: bold;
+    }
+
+    .tile-rack-letter-fs {
+        font-size: var(--rack-letter-fs);
+    }
+
+    .tile-rack-letter-value-fs {
+        font-size: var(--rack-letter-value-fs);
+        font-weight: bold;
+    }
+
+
+.blank-letter-selector {
+    display: inline-block;
+    height: var(--square-size);
+    width: var(--square-size);
+    background-image: url("/Images/woodknots.jpg");
+    background-size: 100% 100%;
+    border-radius: 4px;
+    color: darkred;
+    text-align: center;
+    font-size: var(--board-letter-fs);
+    font-weight: bold;
+    font-style: normal;
+    cursor: pointer;
+    user-select: none;
+    margin: 3px;
+}
+
+.blank-letter-selector:hover {
+    color: red;
+}
+
+.game-play-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+}
+
+/*for player tile row */
+
+.player-tiles {
+    display: flex;
+    position: relative;
+    background-color: white;
+    padding: 3px;
+}
+
+    .player-tiles .tile-container {
+        display: flex;
+        position: relative; /* Override absolute positioning on game square */
+        background-color: white;
+        margin: 4px;
+    }
+    
+.tile-bag {
+    display: flex;
+    background-image: url("/Images/bag-green.png");
+    background-size: 100% 100%;
+    width: var(--tile-rack-size);
+    height: var(--tile-rack-size);
+    font-size: calc(round(down, var(--tile-rack-size)/3, 1));
+    font-weight: bold;
+    color: white;
+    justify-content: center;
+    align-items: end;
+}
+
+
+.tile-content-score {
+    bottom: 1px;
+    right: 1px;
+    position: absolute;
+}
+
+/* For move currently being placed */
+.tile-move-score-placing {
+    bottom: 0px;
+    left: 0px;
+    position: absolute;
+    font-size: var(--board-letter-value-fs);
+    line-height: 100%;
+    background-color: blue;
+    color: white;
+}
+
+/* For most recent completed move */
+.tile-move-score-final {
+    bottom: 0px;
+    left: 0px;
+    position: absolute;
+    font-size: var(--board-letter-value-fs);
+    line-height: 100%;
+    background-color: red;
+    color: snow;
+}
 
 
 .bi {
@@ -532,5 +625,6 @@ textarea {
 }
 
 .computerlevel-indent {
-    margin-left: 1.1em; font-style: italic
+    margin-left: 1.1em;
+    font-style: italic;
 }
