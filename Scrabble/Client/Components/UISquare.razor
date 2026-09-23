@@ -1,20 +1,32 @@
-﻿<div class="square-space">
+﻿<div id="@SquareContainer.ID" class="square">
 
     @{
-        var squareContainerCss = "square";
-        if (SquareContainer.GetType() == typeof(StartSquare)) squareContainerCss = "center-square-container";
+        string squareType = "";
+        if (SquareContainer.GetType() == typeof(StartSquare)) squareType = "square-space-centre";
+        else if (SquareContainer.GetType() == typeof(NormalSquare)) squareType = "square-space-normal";
+        else squareType = "square-space-multiplier";
+
+        string squareLabel = "";
+        if (SquareContainer.Label != "") squareLabel = SquareContainer.Label;
     }
-    <div class="@squareContainerCss" id="@SquareContainer.ID">
-        <div class=@SquareContainer.CssSelector>
-            <div class="center-square-letter">@SquareContainer.Label</div>
+
+    <div class="square-space">
+        <div class="@squareType">
+            <!-- square-space-normal has no CssSelector value so don't place a <div></div>
+                 might be better to just check @SquareContainer.CssSelector != "" ? -->
+            @if (squareType != "square-space-normal")
+            {
+                <div class="@SquareContainer.CssSelector">
+                @squareLabel
+                </div>
+            }
+            @if (!SquareContainer.IsEmpty)
+            {
+                <UITile_2 TilePiece="SquareContainer.Tile"></UITile_2>
+            }
         </div>
-        @if (!SquareContainer.IsEmpty)
-        {
-            <UITile TilePiece="SquareContainer.Tile"></UITile>
-        }
     </div>
 </div>
-
 
 @code {
     [Parameter] public Square SquareContainer { get; set; }

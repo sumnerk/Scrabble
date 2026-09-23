@@ -39,10 +39,9 @@
 else
 {
     <div class="container-fluid">
-
-        <div class="row mb-3 d-flex flex-nowrap overflow-scroll">
+        <div class="row mb-3 d-flex flex-nowrap"> <!-- removed "overflow-scroll" -->
             <!-- Player total scores on the left, current player at the top, next player below -->
-            <div class="col-auto pt-4" id="total-scores">
+            <div id="total-scores" class="col-auto pt-4">
                 <!-- 10rem => 160px -->
                 <!-- 12rem => 192px -->
                 <!-- 15rem => 240px -->
@@ -67,7 +66,7 @@ else
                             TotalMoveDuration = PrintTimeSpan(currentGame.players[i].TotalMoveDuration);
                             j = i;
                             <div class=@($"card mb-2 text-white bg-info {border_decoration_your_go}") style=@($"{score_card_style_options}")>
-                                <h5 class="card-header style="font-weight: bold;">@currentGame.players[i].Name</h5>
+                                <h5 class="card-header">@currentGame.players[i].Name</h5>
                                 <h4 class="card-body" style="text-align: right; font-weight: bold;">@currentGame.players[i].Score</h4>
                                 <div class="card-footer" style="text-align: right; font-style: italic;">@TotalMoveDuration</div>
                             </div>
@@ -129,7 +128,7 @@ else
                             {
                                 winner_shown = true;
                                 shown_counter++;
-                                <div class=@($"card mb-2 text-white bg-success") style=@($"{score_card_style_options}")>
+                                <div class="card mb-2 text-white bg-success" style=@($"{score_card_style_options}")>
                                     <h5 class="card-header">@currentGame.players[i].Name</h5>
                                     <h4 class="card-body" style="text-align: right; font-weight: bold;">@currentGame.players[i].Score</h4>
                                     <div class="card-footer" style="text-align: right; font-style: italic;">@TotalMoveDuration</div>
@@ -140,7 +139,7 @@ else
                             if (winner_shown)
                             {
                                 shown_counter++;
-                                <div class=@($"card mb-2 text-white bg-danger") style=@($"{score_card_style_options}")>
+                                <div class="card mb-2 text-white bg-danger" style=@($"{score_card_style_options}")>
                                     <h6 class="card-header">@currentGame.players[i].Name</h6>
                                     <h6 class="card-body" style="text-align: right;">@currentGame.players[i].Score</h6>
                                     <div class="card-footer" style="text-align: right; font-style: italic;">@TotalMoveDuration</div>
@@ -154,7 +153,7 @@ else
                         @for (int i = 0; i < currentGame.players.Count; i++)
                         {
                             TotalMoveDuration = PrintTimeSpan(currentGame.players[i].TotalMoveDuration);
-                            <div class=@($"card mb-2 text-white bg-primary") style=@($"{score_card_style_options}")>
+                            <div class="card mb-2 text-white bg-primary" style=@($"{score_card_style_options}")>
                                 <h6 class="card-header">@currentGame.players[i].Name</h6>
                                 <h6 class="card-body" style="text-align: right;">@currentGame.players[i].Score</h6>
                                 <div class="card-footer" style="text-align: right; font-style: italic;">@TotalMoveDuration</div>
@@ -167,7 +166,7 @@ else
             <!-- Game board in the middle -->
             <!-- pb-4 means that when the recent moves column is displaced to the next row -->
             <!-- that there is decent separation between it and the action buttons -->
-            <div class="col-auto pb-4 game-board-container d-flex flex-nowrap" id="game-board">
+            <div id="game-board" class="col-auto pb-4 game-board-container d-flex flex-nowrap">
                 @if (!String.IsNullOrEmpty(MessageForLocalHuman))
                 {
                     <div class="scoreboard" id="scoreboard">@MessageForLocalHuman</div>
@@ -176,7 +175,7 @@ else
                 {
                     <div>&nbsp;</div>
                 }
-                <div class="game" id="game">
+                <div id="game" class="game">
                     <div class="game-element-container">
                         <div class="game-board">
                             @for (int y = 0; y < ScrabbleConfig.BoardLength; y++)
@@ -192,10 +191,10 @@ else
                 </div>
 
                 <!-- The owl, player tile rack and tile bag -->
-                <div class="game-play-container" id="game-play-row">
+                <div id="game-play-row" class="game-play-container">
                     <div>
                         @{string owl_is = "invisible";}
-                        @if (!MyMove && currentMoveGameDto != null && AllowTheOwl())
+                        @if (!MyMove && currentMoveGameDto != null && AllowTheOwl() && !showProfessorDialog)
                         {
                             owl_is = "visible";
                         }
@@ -231,24 +230,23 @@ else
                         else
                         {
                             <button @onclick=Shuffle disabled="@DisabledShuffle()">Shuffle</button>
-
                             @for (int i = 0; i < TilesInRack.Count; i++)
                             {
                                 var index = i;
-                                <UITile @key="TilesInRack[index].ID" TilePiece="TilesInRack[index]"></UITile>
+                                <UITile_2 @key="TilesInRack[index].ID" TilePiece="TilesInRack[index]"></UITile_2>
                             }
 
-                            <div class="tile-bag-area">
+                            <!-- <div class="tile-bag-area"> -->
                                 <div class="tile-bag">
                                     @currentGame.TileBag.Inventory.Count
                                 </div>
-                            </div>
+                            <!-- </div> -->
                         }
                     </div>
                 </div>
 
                 <!-- Action buttons -->
-                <div class="action-buttons-container" id="action-buttons-row">
+                <div id="action-buttons-row" class="action-buttons-container">
                     @if (!showProfessorDialog)
                     {
                         <div class="action-buttons-container">
@@ -262,28 +260,34 @@ else
                                 @if (IsSwapping)
                                 {
                                     <span>(Exchange): Select tiles </span>
-                                    <button @onclick=StopSwap disabled="@Disabled()">Cancel</button>
+                                    <button @onclick=StopSwap>Cancel</button>
                                     <button @onclick=DoSwap disabled="@Disabled(SwappingTiles.Count == 0 || (SwappingTiles.Count > currentGame.TileBag.Inventory.Count))">Swap</button>
-
-                                }
-                                else if (WordInPlay.Count == 0)
-                                {
-                                    <button @onclick=Pass disabled="@Disabled(!MyMove)">Pass</button>
-                                    <button @onclick=StartSwap disabled="@Disabled(!MyMove || !CanSwap)">Exchange</button>
                                 }
                                 else
                                 {
-                                    <button @onclick=Play disabled="@Disabled(WordInPlay.Count==0 || !validMove)">Play</button>
-                                    <button @onclick=Recall disabled="@Disabled(WordInPlay.Count==0)">Recall</button>
+                                    if (WordInPlay.Count == 0)
+                                    {
+                                        <button @onclick=Pass disabled="@Disabled(!MyMove)">Pass</button>
+                                        <button @onclick=StartSwap disabled="@Disabled(!MyMove || !CanSwap)">Exchange</button>
+                                    }
+                                    else
+                                    {
+                                        <button @onclick=Play disabled="@Disabled(WordInPlay.Count==0 || !validMove)">Play</button>
+                                        <button @onclick=Recall disabled="@Disabled(WordInPlay.Count==0)">Recall</button>
+                                    }
+                                    <button @onclick=Resign disabled="@Disabled()">Resign</button>
                                 }
-                                <button @onclick=Resign disabled="@Disabled()">Resign</button>
                             }
                             else
                             {
-                                <button @onclick=Rematch disabled="@IsSubmitting">Rematch</button>
+                                <button @onclick=Rematch>Rematch</button>
                             }
 
-                            <button class="@ChatAlert()" @onclick=ShowChat>Chat</button>
+                            <!-- don't get distracted if you are swapping tiles -->
+                            @if (!IsSwapping)
+                            {
+                                <button class="@ChatAlert()" @onclick=ShowChat>Chat</button>
+                            }
                         </div>
                     }
                 </div>
@@ -293,7 +297,7 @@ else
             <!-- it is not displayed on insufficiently wide screens -->
             <!-- for now have removed this from the class 'd-none d-xxl-block' because the .js -->
             <!-- has been jazzed up a bit to improve behaviour when resizing the browser window -->
-            <div class="col-auto pt-4" id="recent-moves">
+            <div id="recent-moves" class="col-auto pt-4">
                 <!-- 15rem => 240px -->
                 <!-- 20rem => 320px -->
                 <!-- @{string moves_card_style_options = "width: 15rem; max-width: 20rem";} -->
@@ -393,6 +397,7 @@ else
     private List<TileInPlay> WordInPlay = new List<TileInPlay>();
 
     private const string JS_SetTileForDrop = "SetTileForDrop";
+    private const string JS_RmEventListenerForSquare = "RmEventListenerForSquare";
 
     private bool IsSwapping = false;
     private bool CanSwap => !currentGame.TileBag.IsEmpty;
@@ -403,10 +408,12 @@ else
     private string MessageForLocalHuman { get; set; }
     private string LoadMessage { get; set; } = "Loading game...";
 
-    //private List<String> LeftPlayerScores { get; set; }
-    //private List<String> RightPlayerScores { get; set; }
-
     private GameDto currentMoveGameDto = null; // For advisory move: State at start of move
+    // For use when owl is invoked: set at start of move to save current state to be restored once
+    // owl has been dismissed. made "global" so if another user move comes in then it can be flagged
+    // as invalidating the saved game state
+    private GameStateDto saveGameStateDto = null;
+
     private bool professorMoveValid = false;
     private bool showProfessorDialog = false;
     private string professorMessage = "";
@@ -433,8 +440,9 @@ else
     [CascadingParameter] private Task<AuthenticationState> authenticationStateTask { get; set; }
     private string myEmail;
     private string myName;
+    private int lastMoveCountProcessed;
 
-
+    private IDisposable LocationChangingHandler;
 
     public async Task PlaySound(string filename)
     {
@@ -453,14 +461,37 @@ else
         }
     }
 
-
-    protected override async Task OnInitializedAsync()
+    private async ValueTask OnLocationChanging(LocationChangingContext context)
     {
-        NavigationManager.LocationChanged += async (o, e) =>
+        // you can use the following call to prevent the navigation :    context.PreventNavigation();
+        var target = context.TargetLocation;
+
+        Console.WriteLine(" ");
+        Console.WriteLine($"OnLocationChanging(): Current Game ID={GameId}");
+        Console.WriteLine($"[GameDisplay] Navigating to : {target}");
+
+        // clean up any DnD related event handlers
+        // these two lines of code moved here from the places in the main body
+        // where NavigateTo was called
+        // from 1.NextUnplayedMatch button
+        //      2.Rematch button
+        //      3.An incoming request for a rematch (in this case the initialLoad flag was NOT being updated)
+        await _jsModule.InvokeVoidAsync("CleanupDragAndDrop", null);
+        // not sure this next one is needed because when we navigate to a game the OnParametersSetAsync
+        // method will set it to true anyway
+        //initialLoad = true;
+
+        // clean up any active hub connections before we go
+        if (hubConnection != null)
         {
-            Console.WriteLine($"Naviagated to: {e.Location}");
-            if (hubConnection != null && !e.Location.Contains("/game/"))
+            if (target.Contains("/game/"))
             {
+                // Navigated to new game id from within existing game; log new game into hub
+                await hubConnection.InvokeAsync("ReceiveGameLogin", GameId);
+            }
+            else
+            {
+                // navigating somewhere else e.g. two letter words or the game list etc
                 try { await hubConnection.StopAsync(); }
                 catch (Exception exception) { Console.WriteLine(exception.Message); }
                 finally { await hubConnection.DisposeAsync(); }
@@ -468,18 +499,22 @@ else
                 Console.WriteLine("*** GameState: Removed hub connection.");
                 hubConnection = null;
             }
-            if (hubConnection != null &&  e.Location.Contains("/game/"))
-            {
-                // Navigated to new game id from within game different; log in new game to hub
-                await hubConnection.InvokeAsync("ReceiveGameLogin", GameId);
-            }
+        }
 
-        };
+        // handler not needed anymore
+        Console.WriteLine("Deregister the LocationChanging Handler");
+        LocationChangingHandler.Dispose();
+    }
 
-        Console.WriteLine($"OnInitialized: Game ID={GameId}");
+    protected override async Task OnInitializedAsync()
+    {
+        Console.WriteLine(" ");
+        Console.WriteLine($"OnInitializedAsync(): Game ID={GameId}");
+
+        Console.WriteLine("Register a LocationChanging Handler");
+        LocationChangingHandler = NavigationManager.RegisterLocationChangingHandler(OnLocationChanging);
 
         await SetupHub();
-
         _jsModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", @Assets["./scripts/DragAndDrop.js"]);
     }
 
@@ -489,15 +524,23 @@ else
         var user = authState.User;
 
         myEmail = user.Claims.Where(x => x.Type == AppEmailClaimType.ThisAppEmailClaimType).Select(x => x.Value).FirstOrDefault();
-        Console.WriteLine($"myEmail={myEmail}");
+        Console.WriteLine($"OnParametersSetAsync(): myEmail={myEmail}");
 
         MessageForLocalHuman = "New game";
         gameDisplayReference = this;
+
+        initialLoad = true;
+        myName = "";
+        lastMoveCountProcessed = -1;
+
         await LoadGameAsync();
-        var nPlayerRows = (currentGame.Players.Count() + 1) / 2;
+
         myName = FindSelf(currentGame).Name;
+        lastMoveCountProcessed = currentGame.MoveCount - 1;
         Console.WriteLine($"myName={myName}");
-        await _jsModule.InvokeVoidAsync("InitializeDragAndDrop", nPlayerRows);
+        Console.WriteLine("lastMoveCountProcessed = " + lastMoveCountProcessed);  // initialization 
+
+        await _jsModule.InvokeVoidAsync("InitializeDragAndDrop");
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -534,8 +577,19 @@ else
 
     }
 
-
-
+    private async Task<GameDto> DownloadGameDto(int gid)
+    {
+        try
+        {
+            return await Http.GetFromJsonAsync<GameDto>($"/api/Game/{gid}");
+        }
+        catch (Exception ex)
+        {
+            LoadMessage = $"Problem downloading GameDto for game id {gid}, ({ex.Message})";
+            Console.WriteLine(ex.ToString());
+            return null;
+        }
+    }
 
     private async Task BuildGame()
     {
@@ -543,9 +597,10 @@ else
         if (GameId > 0)
         {
             var gameDto = await Http.GetFromJsonAsync<GameDto>($"/api/Game/{GameId}");
-
             newGame = new GameState(new List<Player>(), Data.WordLookupSingleton.Instance);
+
             await ApplyDownloadToGui(newGame, gameDto);
+
             if (MyMove)
             {
                 currentMoveGameDto = CloneGameDto(gameDto);
@@ -568,7 +623,6 @@ else
         Game.Instance = newGame;
         currentGame = newGame;
     }
-
 
 
     public static void HandleSingleClickOnTile(string tileId)
@@ -615,6 +669,7 @@ else
             WordInPlay.RemoveAt(wordInPlayIndex);
             fromSquare.Tile = null;
             TilesInRack.Add(tileInPlay.Tile);
+            //Console.WriteLine("Double click on board tile to send back to rack");
             actionsToRunAfterRender.Add((JS_SetTileForDrop, tileId));  // Re-enable for dropped tile
             EvaluateMove();
             StateHasChanged();
@@ -625,13 +680,13 @@ else
     /// <summary>
     /// Called from Javascript after object drop
     /// </summary>
-    /// <param name="dragId">'id' attribute of dragged object</param>
-    /// <param name="dropId">'id' attribute of object dropped into</param>
+    /// <param name="dragId"> 'id' attribute of dragged object
+    /// <param name="dropId"> 'id' attribute of object dropped into
     /// <returns></returns>
     [JSInvokable("HandleDropAsync")]
     public static async Task HandleDropAsync(string dragId, string dropId)
     {
-        Console.WriteLine($"Drop {dragId} onto {dropId}");
+        //Console.WriteLine($"DotNet(HandleDropAsync) : Drop {dragId} onto {dropId}");
         if (gameDisplayReference.IsSwapping) return;
 
         var handled = false;
@@ -659,19 +714,21 @@ else
     /// <summary>
     /// Drop tile onto square; square will be empty because tiles are given a drop priority
     /// </summary>
-    /// <param name="dragId"></param>
-    /// <param name="dropId"></param>
+    /// <param name="dragId">
+    /// <param name="dropId">
     private async Task HandleDropTileOnSquare(string dragId, string dropId)
     {
-        if (!MyMove) return; // Disallow board moves while awaiting partner move
+        if (!MyMove)
+        {
+            //Console.WriteLine("Tile drop ignored - Not my turn");
+            return; // Disallow board moves while awaiting partner move
+        }
 
         var sourceRackIndex = FindTileIndexInRack(dragId); // If starting from rack
         var squareInfo = FindSquareInfo(dropId);
         if (squareInfo == null)
         {
             Console.WriteLine($"HandleDropTileOnSquare : Unable to find square info for dragId: {dragId}, dropId: {dropId}");
-            // perhaps absence of the following was causing the large rack tile to be placed
-            // on the board when it should really have been returned to the rack and/or not rendered at all
             //actionsToRunAfterRender.Add((JS_SetTileForDrop, dragId));  // Re-enable for dropped tile
             return;
         }
@@ -697,6 +754,7 @@ else
             moveTile.PinnedOnBoard = false;
             WordInPlay.Add(new TileInPlay(targetSquare.BoardPosition, moveTile));
 
+            //Console.WriteLine("From rack to empty board square");
             actionsToRunAfterRender.Add((JS_SetTileForDrop, dragId));  // Re-enable for dropped tile
         }
         else
@@ -712,6 +770,8 @@ else
 
                 targetSquare.Tile = tileInPlay.Tile;
                 tileInPlay.BoardPosition = targetSquare.BoardPosition;   // Update board position for WordInPlay
+
+                //Console.WriteLine("From board square to empty board square");
                 actionsToRunAfterRender.Add((JS_SetTileForDrop, dragId));  // Re-enable for dropped tile
             }
         }
@@ -735,15 +795,23 @@ else
     /// <summary>
     /// Drop tile onto tile: might be to reorder player's tile rack or to replace a letter on board in play
     /// </summary>
-    /// <param name="dragId"></param>
-    /// <param name="dropId"></param>
+    /// <param name="dragId">
+    /// <param name="dropId">
     private async Task HandleDropTileOnTile(string dragId, string dropId)
     {
+        // bail out early if drag and drop id values are the same...
+        if (dragId == dropId)
+        {
+            Console.WriteLine("dragId == dropId [" + dragId + "]");
+            return;
+        }
+
         var sourceRackIndex = FindTileIndexInRack(dragId);
         var targetRackIndex = FindTileIndexInRack(dropId);
         if (sourceRackIndex >= 0 && targetRackIndex >= 0)
         {
             // Reorder tiles in tile rack
+            //Console.WriteLine("Reordering tiles in the rack");
             var moveTile = TilesInRack[sourceRackIndex];
             TilesInRack.RemoveAt(sourceRackIndex);
             TilesInRack.Insert(targetRackIndex, moveTile);
@@ -783,6 +851,7 @@ else
                 square.Tile = tileToPlace;
                 tileToPlace.TileInRack = false;
                 WordInPlay.Add(new TileInPlay(square.BoardPosition, tileToPlace));
+                //Console.WriteLine("From rack to tile already on the board");
                 actionsToRunAfterRender.Add((JS_SetTileForDrop, dragId));  // Re-enable for dragged tile
                 actionsToRunAfterRender.Add((JS_SetTileForDrop, dropId));  // Re-enable for tile sent to rack
             }
@@ -797,7 +866,8 @@ else
             // Check for dragging from one board square to drop onto another tile board square
             var wordInPlayDragIndex = FindTileIndexInWordInPlay(dragId);
             var wordInPlayDropIndex = FindTileIndexInWordInPlay(dropId);
-            if (wordInPlayDragIndex >= 0 && wordInPlayDropIndex >= 0)
+            if (wordInPlayDragIndex >= 0 && wordInPlayDropIndex >= 0 &&
+                dragId != dropId)       // saw case where when tile dropped back on itself it created the "double tile" scenario
             {
                 // eligible for drop in place of drop target tile
                 var dragTileInPlay = WordInPlay[wordInPlayDragIndex];
@@ -818,20 +888,17 @@ else
                 // Place tile on board
                 toSquare.Tile = tileToMove;
                 dragTileInPlay.BoardPosition = dropTileInPlay.BoardPosition;  // Update board position for WordInPlay
+                //Console.WriteLine("From tile on board to another tile on board");
                 actionsToRunAfterRender.Add((JS_SetTileForDrop, dragId));  // Re-enable for dropped tile
                 actionsToRunAfterRender.Add((JS_SetTileForDrop, dropId));  // Re-enable for tile in rack
-
             }
-
-
         }
-
     }
 
     /// <summary>
     /// Check if tile ID in player rack
     /// </summary>
-    /// <param name="tileId"></param>
+    /// <param name="tileId">
     /// <returns>Index into list, -1 if not found</returns>
     private int FindTileIndexInRack(string tileId)
     {
@@ -849,7 +916,7 @@ else
     /// <summary>
     /// Check if tile ID in play
     /// </summary>
-    /// <param name="tileId"></param>
+    /// <param name="tileId">
     /// <returns>Index into list, -1 if not found</returns>
     private int FindTileIndexInWordInPlay(string tileId)
     {
@@ -929,6 +996,7 @@ else
 
     private async Task Recall()
     {
+        //Console.WriteLine("Recall tiles back to rack");
         // Restore tile in play to the player rack
         foreach (var tileInPlay in WordInPlay)
         {
@@ -942,7 +1010,6 @@ else
             await InvokeAsync(StateHasChanged); // Notify of removed tile
         }
         WordInPlay.Clear();
-
     }
 
     private void StartSwap()
@@ -1034,12 +1101,6 @@ else
 
             await ApplyDownloadToGui(currentGame, gameDto);
 
-            //MessageForLocalHuman = currentGame.RecentMoves[currentGame.RecentMoves.Count - 1];
-            //var wasRegularMove = MessageForLocalHuman.Contains(" played "); // Kludge check
-            //if (currentGame.players.Count == 2 && wasRegularMove)
-            //{
-            //    MessageForLocalHuman = ""; // Suppress text detail since it's highlighted on tiles (keep cleaner display)
-            //}
             MessageForLocalHuman = ""; // Suppress text detail since it's highlighted on tiles (keep cleaner display)
         }
         catch (Exception ex)
@@ -1067,7 +1128,14 @@ else
 
     private async Task ShowProfessorAdvisor()
     {
-        var saveGameStateDto = new GameStateDto(currentGame);
+        // this feature is great but potentially problematic. it's possible that while you are admiring the suggestions
+        // of the owl that an opponent will make a move which is updated on your screen
+        // so when this saved game is re-instated it wipes out the opponent move
+        // what to do ?
+        // scenario is evident if saveGameStateDto is not null and we receive a ClientReceiveMove event
+        // in this case invalidate the saveGameStateDto (set to null) and then use this fact in this block of
+        // code to rebuild the game from the latest server side copy of the state
+        saveGameStateDto = new GameStateDto(currentGame);
 
         professorMessage = "Thinking ...";
         showProfessorDialog = true;
@@ -1102,7 +1170,29 @@ else
             await Task.Delay(TimeSpan.FromMilliseconds(200));
         }
 
-        if (displayComputerBoard)
+        // owl flown - check if game has been updated
+        bool theGameChanged = false;
+        if (saveGameStateDto == null)
+        {
+            // yipes - game has been updated while we looked to the owl for wisdom
+            // need to get things in order
+            //Console.WriteLine("The game has changed Holmes");
+            theGameChanged = true;
+
+            // jiggery pokery to prevent ApplyDownloadFromGui which is called by BuildGame
+            // doing stuff to the rack and board tiles
+            // it's a nasty hack really
+            // ie make saveGameStateDto not NULL before call to BuildGame
+            saveGameStateDto = new GameStateDto();
+
+            await BuildGame();
+
+            // update the saveGameStateDto...
+            // ...so the next pre-existing if block of code behaves as it always did
+            saveGameStateDto = new GameStateDto(currentGame);
+        }
+
+        if (displayComputerBoard || theGameChanged)
         {
             var restoreGameDto = new GameDto();
             restoreGameDto.GameId = GameId;
@@ -1110,10 +1200,14 @@ else
             restoreGameDto.HighestChatSeen = highestChatSeen;
             restoreGameDto.Chat_Dto = new List<ChatDto>();  // Empty for update - will be overwritten
 
-            initialLoad = true;
-            await ApplyDownloadToGui(currentGame, restoreGameDto);
+            saveGameStateDto = null;
 
+            initialLoad = true;
+            //Console.WriteLine("I can see (the game) clearly now the owl is gone");
+            await ApplyDownloadToGui(currentGame, restoreGameDto);
         }
+
+        saveGameStateDto = null;
         showProfessorDialog = false;
         StateHasChanged();
     }
@@ -1281,8 +1375,6 @@ else
         var nextGameId = MyGamesList.NextUnplayedGameId();
         if (nextGameId > 0)
         {
-            initialLoad = true;
-            await _jsModule.InvokeVoidAsync("CleanupDragAndDrop", null);
             NavigationManager.NavigateTo($"/game/{nextGameId}");
         }
 
@@ -1316,6 +1408,11 @@ else
     private async Task ApplyDownloadToGui(GameState newGame, GameDto gameDto)
     {
         UpdateGameStateFromDto.UpdateGameState(newGame, gameDto.GameState_Dto);
+        if (lastMoveCountProcessed > -1)
+        {
+            Console.WriteLine(" ");
+            Console.WriteLine("Last MoveCount processed (local) " + lastMoveCountProcessed + ", Game MoveCount (current) " + newGame.MoveCount);
+        }
 
         GameId = gameDto.GameId;
         Data.ChatList.Instance = gameDto.Chat_Dto;
@@ -1329,18 +1426,56 @@ else
             return;
         }
         MyMove = myPlayer.MyTurn;
-        SetTilesInRack(myPlayer.Tiles);
 
-        // Assume all tiles are newly created - reenable drag & drop
-        for (int i = 0; i < TilesInRack.Count; i++)
+        // check if we are in a strigiform situation and act accordingly
+        if (saveGameStateDto == null)  // no owl
         {
-            var tile = TilesInRack[i];
-            actionsToRunAfterRender.Add((JS_SetTileForDrop, tile.ID));
+            //CheckTheTileSituation(myPlayer.Tiles);
+            SetTilesInRack(myPlayer.Tiles);
+
+            // Assume all tiles are newly created - reenable drag & drop
+            for (int i = 0; i < TilesInRack.Count; i++)
+            {
+                var tile = TilesInRack[i];
+                //Console.WriteLine("set for drop : " + tile.ID);
+                actionsToRunAfterRender.Add((JS_SetTileForDrop, tile.ID));
+            }
+
+            // remove event listeners for squares with newly pinned tiles
+            if (lastMoveCountProcessed > -1)
+            {
+                string squareIdList = "";
+                for (int i = 0; i < newGame.RecentMoves.Count; i++)
+                {
+                    //Console.WriteLine(newGame.RecentMoves[i]);
+                    if (newGame.RecentMoves[i].Contains(":"))
+                    {
+                        string [] recentMovesArray = newGame.RecentMoves[i].Split(":"); 
+                        int recentMovesCount = Int32.Parse(recentMovesArray[0]);
+                        // avoid processing previous moves
+                        if (recentMovesCount > lastMoveCountProcessed)
+                        {
+                            Console.WriteLine(newGame.RecentMoves[i]);
+                            for (int j = 1; j < recentMovesArray.Length; j++)
+                            {
+                                squareIdList = squareIdList + recentMovesArray[j] + ";";
+                            }
+                            lastMoveCountProcessed = recentMovesCount;
+                        }
+                    }
+                }
+                if (squareIdList.Length > 0)
+                {
+                    if (squareIdList.EndsWith(";"))
+                        squareIdList = squareIdList.TrimEnd(';');
+                    //Console.WriteLine("squareID list is '" + squareIdList + "'");
+                    actionsToRunAfterRender.Add((JS_RmEventListenerForSquare, squareIdList));
+                }
+            }
         }
 
         WordInPlay.Clear();
         validMove = false;
-        //UpdateGameScore(newGame);
 
         if (!MyMove)
         {
@@ -1364,41 +1499,97 @@ else
         initialLoad = false;
     }
 
+    private void CheckTheTileSituation(List<Tile> listOfTiles)
+    {
+        // utility function for debugging
+        // there is TilesInRack - what the client has in place
+        // there is listOfTiles - what the server just sent us
+        // dump out both lists
+        // identify new tiles, tiles in a different position and tiles in the same position
+
+        if (listOfTiles != null)
+        {
+            Console.WriteLine("Tile Count : (from server) " + listOfTiles.Count);
+            for (int i = 0; i < listOfTiles.Count; i++)
+            {
+                Console.WriteLine(i + "." + listOfTiles[i].ID + " [" + listOfTiles[i].Letter + "]");
+            }
+        }
+
+        if (TilesInRack != null)
+        {
+            Console.WriteLine("Tile Count : (local rack) " + TilesInRack.Count);
+            for (int i = 0; i < TilesInRack.Count; i++)
+            {
+                Console.WriteLine(i + "." + TilesInRack[i].ID + " [" + TilesInRack[i].Letter + "]");
+            }
+        }
+
+        // build a list of tiles that have been added to the rack
+        //List<Tile> addedTiles = new List<Tile> ();
+
+        for (int i = 0; i < listOfTiles.Count; i++)
+        {
+            var rackTileIndex = FindTileById(TilesInRack, listOfTiles[i].ID);
+            if (rackTileIndex < 0)
+            {
+                // it's a new tile
+                Console.WriteLine("New rack tile : " + listOfTiles[i].ID + " [" + listOfTiles[i].Letter + "]");
+                //addedTiles.Add(listOfTiles[i]);
+                continue;
+            }
+            if (rackTileIndex == i)
+            {
+                // it's an existing tile in the same location on the rack
+                Console.WriteLine("Existing rack tile : " + listOfTiles[i].ID + " [" + listOfTiles[i].Letter + "] @ " + i);
+                continue;
+            }
+
+            Console.WriteLine("Existing rack tile (different position): " + listOfTiles[i].ID +
+                              " [" + listOfTiles[i].Letter + "] now @ " + rackTileIndex + " vs. " + i);
+        }
+    }
+
     /// <summary>
     /// Set TilesInRack pointer; tiles may have been shuffled locally while waiting on partner
     /// players move.  Retain tile order when new game state comes back from server.
     /// Tiles may have been added or exchanged from the turn.
     /// </summary>
-    /// <param name="newTiles"></param>
-    private void SetTilesInRack(List<Tile> newTiles)
+    /// <param name="newTiles">
+    private void SetTilesInRack(List<Tile> listOfTiles)
     {
         if (TilesInRack == null){
             // First assignment
-            TilesInRack = newTiles;
+            TilesInRack = listOfTiles;
             return;
         }
-        for (int i=0; i < newTiles.Count && i < TilesInRack.Count; i++)
-        {
-            var oldTileIndex = FindTileById(newTiles, TilesInRack[i].ID);
-            if (oldTileIndex < 0 || oldTileIndex == i) continue;
-            // Swap tiles to match
-            var tempTile = newTiles[i];
-            newTiles[i] = newTiles[oldTileIndex];
-            newTiles[oldTileIndex] = tempTile;
-        }
-        TilesInRack = newTiles;
-    }
 
+        for (int i=0; i < listOfTiles.Count && i < TilesInRack.Count; i++)
+        {
+            var oldTileIndex = FindTileById(listOfTiles, TilesInRack[i].ID);
+            if (oldTileIndex < 0 || oldTileIndex == i) continue;
+
+            // An existing tile that's been shuffled - Swap tiles to match
+            var tempTile = listOfTiles[i];
+            listOfTiles[i] = listOfTiles[oldTileIndex];
+            listOfTiles[oldTileIndex] = tempTile;
+        }
+    
+        TilesInRack = listOfTiles;
+    }
 
     /// <summary>
     /// Search tile list for Id
     /// </summary>
-    /// <param name="tileList"></param>
-    /// <param name="tileId"></param>
+    /// <param name="tileList">
+    /// <param name="tileId">
     /// <returns></returns>
     private int FindTileById(List<Tile> tileList, string tileId)
     {
         var foundIndex = -1;
+        if (tileList == null)
+            return foundIndex;
+
         for (int i = 0; i < tileList.Count; i++)
         {
             if (tileList[i].ID == tileId)
@@ -1438,8 +1629,6 @@ else
             // so that multiple players don't rematch into new / different games
             await hubConnection.InvokeAsync("BroadcastRematchGame", GameId, newGameId);
 
-            await _jsModule.InvokeVoidAsync("CleanupDragAndDrop", null);
-            initialLoad = true;
             NavigationManager.NavigateTo($"/game/{newGameId}");
 
         }
@@ -1506,6 +1695,13 @@ else
             {
                 GameId = gameId;
                 Console.WriteLine($"ClientReceiveMove for game {gameId}");
+                if (saveGameStateDto != null)
+                {
+                    Console.WriteLine("WARNING - game updated while OWL deployed");
+                    Console.WriteLine("WARNING - savedGameStateDto will be out of sync");
+                    saveGameStateDto = null;
+                    return;
+                }
                 await BuildGame();
                 StateHasChanged();
                 if (currentGame.FinalGameStatus == null)
@@ -1545,7 +1741,6 @@ else
         // An opponent has invoked the rematch challenge for this game
         hubConnection.On<int>("ClientRematch", async (newGameId) =>
                 {
-                    await _jsModule.InvokeVoidAsync("CleanupDragAndDrop", null);
                     NavigationManager.NavigateTo($"/game/{newGameId}");
                 });
 
@@ -1564,31 +1759,6 @@ else
         await hubConnection.InvokeAsync("ReceiveGameLogin", GameId);
     }
 
-/*
-    void UpdateGameScore(GameState gameState)
-    {
-        LeftPlayerScores = new List<String>();
-        RightPlayerScores = new List<String>();
-        int playerCount = 0;
-        foreach (var player in gameState.Players)
-        {
-            var name = player.Name;
-            var score = player.Score;
-
-            var playerScore = $"{name}:{score}";
-            if (playerCount < (gameState.Players.Count() / 2))
-            {
-                LeftPlayerScores.Add(playerScore);
-            }
-            else
-            {
-                RightPlayerScores.Add(playerScore);
-            }
-            playerCount++;
-        }
-    }
-*/
-
     public string PrintTimeSpan(TimeSpan t)
     {
        if (t == TimeSpan.Zero) return string.Empty;
@@ -1606,9 +1776,13 @@ else
        {
          answer = String.Format("{0}m {1}s", t.Minutes, t.Seconds);
        }
-       else // more than 1 hour
+       else if (t.TotalDays < 1.0)
        {
          answer = String.Format("{0}h {1}m {2}s", t.Hours, t.Minutes, t.Seconds);
+       }
+       else
+       {
+         answer = String.Format("{0}d {1}h {2}m {3}s", t.Days, t.Hours, t.Minutes, t.Seconds);
        }
 
        return answer;

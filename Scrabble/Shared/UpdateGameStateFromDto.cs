@@ -55,6 +55,7 @@ namespace Scrabble.Shared
             activePlayer.LastMoveScore = sourcePlayer.LastMoveScore;
             activePlayer.Tiles =sourcePlayer.Tiles;
             activePlayer.MyTurn = sourcePlayer.MyTurn;
+            activePlayer.MyMoveCount = sourcePlayer.MyMoveCount;
             activePlayer.PlayerPasses = sourcePlayer.PlayerPasses;
             activePlayer.Skill = sourcePlayer.Skill;
 

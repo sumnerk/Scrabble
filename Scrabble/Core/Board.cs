@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Security.Cryptography.X509Certificates;
 using Scrabble.Core.Config;
 using Scrabble.Core.Squares;
 
@@ -54,15 +55,18 @@ namespace Scrabble.Core.Types
             Get(c).Tile = t;
         }
 
-        public void Put(Move m)
+        public string Put(Move m)
         {
+            List<string> idList = new List<string>();
             var letters = m.Letters;
             foreach (var letter in letters)
             {
                 Put(letter.tile, letter.coord);
+                idList.Add(Get(letter.coord).ID + ";" + Get(letter.coord).Tile.ID);
             }
+            string squareIDs = String.Join(";", idList);
+            return squareIDs;
         }
-
 
         public List<(Coordinate coord, Square square)> OccupiedSquares()
         {

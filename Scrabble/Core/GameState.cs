@@ -85,10 +85,10 @@ namespace Scrabble.Core.Types
         public void NextMove(string lastMoveDetail)
         {
             this.CurrentPlayer.MyTurn = false;
-            ++this.moveCount;
+            this.moveCount++;
 
             Console.WriteLine(" ");
-            Console.WriteLine("Move #" + (this.moveCount + 1));
+            Console.WriteLine("Move #" + MoveCount);
 
             // move on to the next active player
             do
@@ -99,6 +99,7 @@ namespace Scrabble.Core.Types
             StartTheClock(false);
 
             this.CurrentPlayer.MyTurn = true;
+            this.CurrentPlayer.MyMoveCount = moveCount;
             this.CurrentPlayer.NotifyTurn((ITurnImplementor)this, lastMoveDetail);
         }
 
@@ -173,12 +174,16 @@ namespace Scrabble.Core.Types
             };
             TrackRecentMoveInfo(mi);
 
+            // set the move count to 1 as this is the start of the game
+            this.moveCount = 1;
+
             Console.WriteLine(" ");
-            Console.WriteLine("Move #" + (this.MoveCount + 1));
+            Console.WriteLine("Move #" + MoveCount);
 
             StartTheClock(false);
 
             this.CurrentPlayer.MyTurn = true;
+            this.CurrentPlayer.MyMoveCount = moveCount;
             this.CurrentPlayer.NotifyTurn((ITurnImplementor)this, "You won the tile draw.");
 
             return drawOutcome;
@@ -389,7 +394,20 @@ namespace Scrabble.Core.Types
             var thisMove = new Move(this, turn.Letters, true);
             if (!thisMove.IsValid)
                 throw new InvalidMoveException("Move violates position requirements or forms one or more invalid words.");
-            this.board.Put(thisMove);  // May already be present on board for local interactive player but not for computer player
+
+            // use of RecentMoves had previously been replaced by ListOfRecentMoves so it has now been given a new
+            // lease of life and repurposed to hold the Square and Tile location coordinates of the recently placed tiles.
+            // The list is prepended with the MoveCount because when it's man versus machine the machine
+            // plays so quickly that the notification of the move that the client side receives also includes
+            // that of the computer...
+            // ...and it means the client side can keep track of the events that have been processed and only apply
+            // new ones
+            string squareIDs = MoveCount + ":" + this.board.Put(thisMove);   // May already be present on board for local interactive player but not for computer player
+            Console.WriteLine(squareIDs);
+            RecentMoves.Add(squareIDs);
+            if (RecentMoves.Count > RecentMoveKeepCount)
+                RecentMoves.RemoveAt(0);  // Remove oldest entry
+
             foreach (var letter in thisMove.Letters)
             {
                 letter.tile.PinnedOnBoard = true;
